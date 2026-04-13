@@ -1,0 +1,50 @@
+[workspace]
+name = "numbast-eigen"
+channels = ["conda-forge", "numba", "nvidia"]
+platforms = ["linux-64"]
+
+[dependencies]
+python = ">=3.10"
+eigen = "*"
+pytest = "*"
+pyyaml = "*"
+click = "*"
+jinja2 = "*"
+cmake = ">=3.29"
+clangdev = ">=18,<22.0"
+pybind11 = "*"
+cxx-compiler = "*"
+scikit-build-core = "*"
+pip = "*"
+ninja = "*"
+numpy = "*"
+
+[system-requirements]
+cuda = "12"
+
+[dependencies.numba-cuda]
+version = ">=0.25.0"
+
+[dependencies.cuda-version]
+version = "12.9.*"
+
+[dependencies.cuda-toolkit]
+version = "12.9.*"
+
+[dependencies.cuda-python]
+version = "12.9.*"
+
+[tasks.build-ast-canopy]
+cmd = ["bash", "/home/wangm/numbast/ast_canopy/build.sh", "--incremental"]
+
+[tasks.install-numbast]
+cmd = ["pip", "install", "-e", "/home/wangm/numbast/numbast"]
+depends-on = ["build-ast-canopy"]
+
+[tasks.install-all]
+cmd = ["pip", "install", "-e", "/home/wangm/numbast/numbast"]
+depends-on = ["build-ast-canopy"]
+
+[tasks.test]
+cmd = ["pytest", "tests/", "-v"]
+depends-on = ["install-all"]
