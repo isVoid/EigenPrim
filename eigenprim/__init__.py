@@ -26,14 +26,6 @@ from eigenprim.bind import EigenBindings, bind_eigen_header
 # Lazy import map: attribute name -> (module, attribute)
 # Sub-modules bind on first import, so only the modules you use get compiled.
 _LAZY_IMPORTS = {
-    # Thin wrappers (eigenprim.vec3f)
-    "Vec3f": ("eigenprim.vec3f", "Vec3f"),
-    "vec3f_add": ("eigenprim.vec3f", "vec3f_add"),
-    "vec3f_dot": ("eigenprim.vec3f", "vec3f_dot"),
-    "vec3f_cross": ("eigenprim.vec3f", "vec3f_cross"),
-    "vec3f_norm": ("eigenprim.vec3f", "vec3f_norm"),
-    "vec3f_normalized": ("eigenprim.vec3f", "vec3f_normalized"),
-    "vec3f_scale": ("eigenprim.vec3f", "vec3f_scale"),
     # Templates (eigenprim.templates)
     "templated_dot3": ("eigenprim.templates", "templated_dot3"),
 }

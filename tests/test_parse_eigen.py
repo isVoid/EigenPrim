@@ -32,67 +32,6 @@ def _parse(header_name, bypass_errors=False, verbose=False, extra_retain=None):
     )
 
 
-# ---- Vec3f: Thin wrappers (plain structs + device functions) ----
-
-class TestVec3fParsing:
-    """Vec3f: Plain structs and device functions that internally call Eigen.
-    This should work out of the box since the API surface is simple C++ types."""
-
-    @pytest.fixture(scope="class")
-    def decls(self):
-        return _parse("vec3f.cuh", extra_retain=["vec3f_decl.cuh"])
-
-    def test_parsing_succeeds(self, decls):
-        assert decls is not None
-
-    def test_vec3f_struct_found(self, decls):
-        struct_names = [s.name for s in decls.structs]
-        assert "Vec3f" in struct_names, f"Vec3f not found in {struct_names}"
-
-    def test_vec3f_fields(self, decls):
-        vec3f = [s for s in decls.structs if s.name == "Vec3f"][0]
-        field_names = [f.name for f in vec3f.fields]
-        assert "x" in field_names
-        assert "y" in field_names
-        assert "z" in field_names
-
-    def test_vec3f_constructors(self, decls):
-        vec3f = [s for s in decls.structs if s.name == "Vec3f"][0]
-        ctors = list(vec3f.constructors())
-        assert len(ctors) >= 2, f"Expected at least 2 constructors, found {len(ctors)}"
-
-    def test_device_functions_found(self, decls):
-        func_names = [f.name for f in decls.functions]
-        expected = [
-            "vec3f_add", "vec3f_dot", "vec3f_cross",
-            "vec3f_norm", "vec3f_normalized", "vec3f_scale",
-        ]
-        for name in expected:
-            assert name in func_names, f"Function {name} not found in {func_names}"
-
-    def test_function_exec_space(self, decls):
-        from ast_canopy.pylibastcanopy import execution_space
-        for func in decls.functions:
-            if func.name.startswith("vec3f_"):
-                assert func.exec_space == execution_space.device, (
-                    f"{func.name} has exec_space={func.exec_space}, expected device"
-                )
-
-    def test_function_return_types(self, decls):
-        for func in decls.functions:
-            if func.name == "vec3f_dot" or func.name == "vec3f_norm":
-                assert "float" in func.return_type.unqualified_non_ref_type_name
-            elif func.name == "vec3f_add":
-                assert "Vec3f" in func.return_type.unqualified_non_ref_type_name
-
-    def test_function_param_types(self, decls):
-        for func in decls.functions:
-            if func.name == "vec3f_add":
-                assert len(func.params) == 2
-            elif func.name == "vec3f_scale":
-                assert len(func.params) == 2
-
-
 # ---- Matrix: Direct Eigen type usage ----
 
 class TestMatrixParsing:

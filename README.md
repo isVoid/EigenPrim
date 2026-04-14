@@ -142,16 +142,6 @@ def kernel(out):
 
 Operations without an operator (dot, norm, cross, determinant, inverse, transpose, trace) use named functions.
 
-### Thin Wrapper API (Vec3f)
-
-An alternative API using a simple `Vec3f` struct with named fields `.x`, `.y`, `.z`:
-
-```python
-from eigenprim import Vec3f, vec3f_dot, vec3f_add, links
-```
-
-Available functions: `vec3f_add`, `vec3f_dot`, `vec3f_cross`, `vec3f_norm`, `vec3f_normalized`, `vec3f_scale`.
-
 ### Template Functions
 
 Generic functions where Numba deduces the scalar type from arguments:
@@ -171,8 +161,8 @@ def kernel(out):
 ## Examples
 
 ```bash
-pixi run python example.py       # Vec3f thin wrappers
-pixi run python example_l2.py    # Eigen matrix types (Vector2f..Matrix4f)
+pixi run python example.py       # Vector3f basics with operators
+pixi run python example_l2.py    # All types: Vector2f..Matrix4f
 pixi run python example_l3.py    # Template bindings
 ```
 

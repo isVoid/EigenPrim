@@ -93,7 +93,7 @@ def bind_eigen_header(
     if stub_header and type_map:
         bound_types = register_eigen_types(shim_writer, stub_header, type_map, cc)
 
-    # Bind structs from the parsed declarations (L1: Vec3f, etc.)
+    # Bind structs from the parsed declarations
     for struct in decls.structs:
         try:
             S = bind_cxx_struct(shim_writer, struct, nbtypes.Type, StructModel)

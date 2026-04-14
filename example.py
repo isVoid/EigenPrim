@@ -1,7 +1,7 @@
 """
-Eigenprim: Vec3f — thin wrappers over Eigen.
+Eigenprim: Vector3f basics.
 
-Just import and use. No header paths, no manual binding.
+Just import and use. Operators (+, -, *, @) work naturally.
 
 Run:  pixi run python example.py
 """
@@ -9,16 +9,16 @@ Run:  pixi run python example.py
 import numpy as np
 from numba import cuda
 
-from eigenprim import Vec3f, vec3f_add, vec3f_dot, vec3f_norm, links
+from eigenprim import Vector3f, eigen_vec3f_dot, eigen_vec3f_norm, links
 
 
 @cuda.jit(link=links())
 def kernel(out_dot, out_norm):
-    a = Vec3f(1.0, 2.0, 3.0)
-    b = Vec3f(4.0, 5.0, 6.0)
-    out_dot[0] = vec3f_dot(a, b)
-    c = vec3f_add(a, b)
-    out_norm[0] = vec3f_norm(c)
+    a = Vector3f(1.0, 2.0, 3.0)
+    b = Vector3f(4.0, 5.0, 6.0)
+    out_dot[0] = eigen_vec3f_dot(a, b)
+    c = a + b
+    out_norm[0] = eigen_vec3f_norm(c)
 
 
 out_dot = np.zeros(1, dtype=np.float32)
