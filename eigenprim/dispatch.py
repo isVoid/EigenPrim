@@ -130,7 +130,8 @@ def register_dispatch(types, functions):
     # ── Binary (same, same) → same ───────────────────────────────
 
     _binary_same = {}  # op_name -> {(nbt, nbt): fn}
-    for op in ["add", "sub", "cwise_product", "cwise_min", "cwise_max"]:
+    # Ops available for both vectors and matrices
+    for op in ["add", "sub", "cwise_product"]:
         table = {}
         for vname, tkey, _ in _VEC_SPECS:
             vt = types[tkey]._nbtype
@@ -138,6 +139,13 @@ def register_dispatch(types, functions):
         for mname, mtkey, _, _, _ in _MAT_VEC_SPECS:
             mt = types[mtkey]._nbtype
             table[(mt, mt)] = functions[f"eigen_{mname}_{op}"]
+        _binary_same[op] = table
+    # Ops available for vectors only
+    for op in ["cwise_min", "cwise_max"]:
+        table = {}
+        for vname, tkey, _ in _VEC_SPECS:
+            vt = types[tkey]._nbtype
+            table[(vt, vt)] = functions[f"eigen_{vname}_{op}"]
         _binary_same[op] = table
 
     # ── Binary (same, same) → scalar (dot only) ──────────────────
@@ -216,10 +224,14 @@ def register_dispatch(types, functions):
     _scale_table = {}
     for vname, tkey, scalar_nbt in _VEC_SPECS:
         vt = types[tkey]._nbtype
-        _scale_table[(vt, scalar_nbt)] = functions[f"eigen_{vname}_scale"]
+        fn = functions[f"eigen_{vname}_scale"]
+        for snbt in (nbtypes.float32, nbtypes.float64):
+            _scale_table[(vt, snbt)] = fn
     for mname, mtkey, _, _, scalar_nbt in _MAT_VEC_SPECS:
         mt = types[mtkey]._nbtype
-        _scale_table[(mt, scalar_nbt)] = functions[f"eigen_{mname}_scale"]
+        fn = functions[f"eigen_{mname}_scale"]
+        for snbt in (nbtypes.float32, nbtypes.float64):
+            _scale_table[(mt, snbt)] = fn
 
     # ── Matrix multiply: mat × mat, mat × vec ────────────────────
 

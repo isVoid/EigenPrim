@@ -56,8 +56,11 @@ def register_operators(types, functions):
         vt = types[tkey]._nbtype
         _add_table[(vt, vt)] = functions[f"eigen_{vname}_add"]
         _sub_table[(vt, vt)] = functions[f"eigen_{vname}_sub"]
-        _mul_table[(vt, scalar_nbt)] = functions[f"eigen_{vname}_scale"]
-        _mul_table[(scalar_nbt, vt)] = (functions[f"eigen_{vname}_scale"], True)  # swapped
+        fn = functions[f"eigen_{vname}_scale"]
+        # Register both float32 and float64 scalars (Numba literals are float64)
+        for snbt in (nbtypes.float32, nbtypes.float64):
+            _mul_table[(vt, snbt)] = fn
+            _mul_table[(snbt, vt)] = (fn, True)  # swapped
 
     for mname, mtkey, vname, vtkey in _MAT_VEC_SPECS:
         mt = types[mtkey]._nbtype
