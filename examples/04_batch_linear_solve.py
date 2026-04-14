@@ -5,7 +5,7 @@ Each CUDA thread solves Ax = b for a different right-hand side b,
 using inverse(A) @ b. This is efficient for small fixed-size matrices
 where Eigen computes the inverse via cofactor expansion.
 
-Run:  pixi run python examples/05_batch_linear_solve.py
+Run:  pixi run python examples/04_batch_linear_solve.py
 """
 
 import numpy as np

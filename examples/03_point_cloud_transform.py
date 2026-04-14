@@ -4,7 +4,7 @@ Eigenprim: Rigid-body transform of a 3D point cloud.
 Each CUDA thread applies a rotation matrix + translation to one point,
 then computes the distance from origin and projection onto a direction.
 
-Run:  pixi run python examples/04_point_cloud_transform.py
+Run:  pixi run python examples/03_point_cloud_transform.py
 """
 
 import numpy as np

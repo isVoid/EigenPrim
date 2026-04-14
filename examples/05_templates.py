@@ -3,7 +3,7 @@ Eigenprim: Template bindings.
 
 Generic templated_dot3<Scalar> — Numba deduces <float> from argument types.
 
-Run:  pixi run python examples/03_templates.py
+Run:  pixi run python examples/05_templates.py
 """
 
 import numpy as np
