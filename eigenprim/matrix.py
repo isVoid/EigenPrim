@@ -114,4 +114,7 @@ TYPE_NAMES = [
 from eigenprim.operators import register_operators
 register_operators(_bindings.types, _bindings.functions)
 
+from eigenprim.dispatch import register_dispatch
+register_dispatch(_bindings.types, _bindings.functions)
+
 __all__ = TYPE_NAMES + FUNCTION_NAMES

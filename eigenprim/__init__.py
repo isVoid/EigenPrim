@@ -20,6 +20,13 @@ import importlib
 
 from eigenprim._registry import links
 from eigenprim.bind import EigenBindings, bind_eigen_header
+from eigenprim.dispatch import (
+    add, sub, dot, cross, norm, squared_norm, normalized, scale,
+    cwise_product, cwise_abs, cwise_min, cwise_max,
+    sum, min_coeff, max_coeff, outer, mul,
+    determinant, inverse, transpose, trace, diagonal, vec_mul,
+    DISPATCH_NAMES,
+)
 
 # ── Build lazy import map ─────────────────────────────────────────
 
@@ -74,6 +81,7 @@ __all__ = [
     "bind_eigen_header",
     "EigenBindings",
     "links",
+    *DISPATCH_NAMES,
     *_LAZY_IMPORTS.keys(),
 ]
 
