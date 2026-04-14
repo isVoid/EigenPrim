@@ -284,7 +284,8 @@ The key requirement: NVRTC (used by numba-cuda) cannot compile Eigen headers. So
 pixi install
 pixi run build-ast-canopy
 pixi run install-numbast
-pixi run python example.py
+pixi run test          # runs all examples + pytest
+pixi run run-examples  # examples only
 ```
 
 ### Dependencies

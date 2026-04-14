@@ -45,6 +45,10 @@ depends-on = ["build-ast-canopy"]
 cmd = ["pip", "install", "-e", "/home/wangm/numbast/numbast"]
 depends-on = ["build-ast-canopy"]
 
+[tasks.run-examples]
+cmd = ["bash", "-c", "python examples/01_vector_basics.py && python examples/02_all_types.py && python examples/03_templates.py && python examples/04_point_cloud_transform.py"]
+depends-on = ["install-all"]
+
 [tasks.test]
 cmd = ["pytest", "tests/", "-v"]
-depends-on = ["install-all"]
+depends-on = ["install-all", "run-examples"]
