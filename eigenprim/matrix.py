@@ -1,6 +1,6 @@
 """Pre-bound Eigen vector and matrix bindings.
 
-12 types (Vector2f..Vector4d, Matrix2f..Matrix4d) and ~92 device functions.
+12 types (Vector2f..Vector4d, Matrix2f..Matrix4d) and 170 device functions.
 
 Usage::
 
@@ -70,10 +70,17 @@ Matrix4d = _bindings.types["Eigen::Matrix<double, 4, 4>"]
 # ── Function bindings ─────────────────────────────────────────────
 
 # Build the complete function name list programmatically.
-_VEC_OPS = ["add", "sub", "dot", "norm", "squared_norm", "normalized", "scale"]
+_VEC_OPS = [
+    "add", "sub", "dot", "norm", "squared_norm", "normalized", "scale",
+    "cwise_product", "cwise_abs", "cwise_min", "cwise_max",
+    "sum", "min_coeff", "max_coeff", "outer",
+]
 _VEC_TYPES = ["vec2f", "vec3f", "vec4f", "vec2d", "vec3d", "vec4d"]
 
-_MAT_OPS = ["add", "sub", "mul", "determinant", "inverse", "transpose", "trace"]
+_MAT_OPS = [
+    "add", "sub", "mul", "determinant", "inverse", "transpose", "trace",
+    "cwise_product", "scale", "norm", "squared_norm", "diagonal",
+]
 _MAT_VEC_PAIRS = [
     ("mat2f", "vec2f"), ("mat3f", "vec3f"), ("mat4f", "vec4f"),
     ("mat2d", "vec2d"), ("mat3d", "vec3d"), ("mat4d", "vec4d"),

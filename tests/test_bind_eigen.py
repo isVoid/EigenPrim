@@ -59,6 +59,6 @@ class TestMatrixBindings:
         for name, etype, msg in results["failed"]:
             print(f"  Failed: {name} ({etype}): {msg}")
 
-        assert len(results["bound"]) == 92, (
-            f"Expected all 92 Eigen functions to bind, got {len(results['bound'])}"
+        assert len(results["bound"]) == 170, (
+            f"Expected all 170 Eigen functions to bind, got {len(results['bound'])}"
         )

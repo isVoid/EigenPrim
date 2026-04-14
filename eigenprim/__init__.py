@@ -38,9 +38,16 @@ for _type_name in [
     _LAZY_IMPORTS[_type_name] = ("eigenprim.matrix", _type_name)
 
 # Eigen matrix functions (eigenprim.matrix) — ~92 functions
-_VEC_OPS = ["add", "sub", "dot", "norm", "squared_norm", "normalized", "scale"]
+_VEC_OPS = [
+    "add", "sub", "dot", "norm", "squared_norm", "normalized", "scale",
+    "cwise_product", "cwise_abs", "cwise_min", "cwise_max",
+    "sum", "min_coeff", "max_coeff", "outer",
+]
 _VEC_TYPES = ["vec2f", "vec3f", "vec4f", "vec2d", "vec3d", "vec4d"]
-_MAT_OPS = ["add", "sub", "mul", "determinant", "inverse", "transpose", "trace"]
+_MAT_OPS = [
+    "add", "sub", "mul", "determinant", "inverse", "transpose", "trace",
+    "cwise_product", "scale", "norm", "squared_norm", "diagonal",
+]
 _MAT_VEC_PAIRS = [
     ("mat2f", "vec2f"), ("mat3f", "vec3f"), ("mat4f", "vec4f"),
     ("mat2d", "vec2d"), ("mat3d", "vec3d"), ("mat4d", "vec4d"),

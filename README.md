@@ -92,6 +92,14 @@ Available for all 6 vector types (`vec2f` through `vec4d`):
 | `normalized(v)` | `eigen_vec3f_normalized(v)` | vector |
 | `scale(v, s)` | `eigen_vec3f_scale(v, 2.0)` | vector |
 | `cross(a, b)` | `eigen_vec3f_cross(a, b)` | vector |
+| `cwise_product(a, b)` | `eigen_vec3f_cwise_product(a, b)` | vector |
+| `cwise_abs(v)` | `eigen_vec3f_cwise_abs(v)` | vector |
+| `cwise_min(a, b)` | `eigen_vec3f_cwise_min(a, b)` | vector |
+| `cwise_max(a, b)` | `eigen_vec3f_cwise_max(a, b)` | vector |
+| `sum(v)` | `eigen_vec3f_sum(v)` | scalar |
+| `min_coeff(v)` | `eigen_vec3f_min_coeff(v)` | scalar |
+| `max_coeff(v)` | `eigen_vec3f_max_coeff(v)` | scalar |
+| `outer(a, b)` | `eigen_vec3f_outer(a, b)` | matrix |
 
 `cross` is only available for 3D vectors (`vec3f`, `vec3d`).
 
@@ -111,6 +119,11 @@ Available for all 6 matrix types (`mat2f` through `mat4d`):
 | `inverse(m)` | `eigen_mat3f_inverse(m)` | matrix |
 | `transpose(m)` | `eigen_mat3f_transpose(m)` | matrix |
 | `trace(m)` | `eigen_mat3f_trace(m)` | scalar |
+| `cwise_product(a, b)` | `eigen_mat3f_cwise_product(a, b)` | matrix |
+| `scale(m, s)` | `eigen_mat3f_scale(m, 2.0)` | matrix |
+| `norm(m)` | `eigen_mat3f_norm(m)` | scalar (Frobenius) |
+| `squared_norm(m)` | `eigen_mat3f_squared_norm(m)` | scalar |
+| `diagonal(m)` | `eigen_mat3f_diagonal(m)` | vector |
 
 Matrix-vector multiply uses the pattern `eigen_{mattype}_{vectype}_mul` — for example, `eigen_mat4f_vec4f_mul(m, v)`.
 
