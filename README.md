@@ -35,6 +35,7 @@ Import types and functions, pass `links()` to `@cuda.jit`, and use them directly
 | `Vector2f` | `Matrix<float,2,1>` | `Vector2f(x, y)` |
 | `Vector3f` | `Matrix<float,3,1>` | `Vector3f(x, y, z)` |
 | `Vector4f` | `Matrix<float,4,1>` | `Vector4f(x, y, z, w)` |
+| `Vector3h` | `Matrix<half,3,1>` | `Vector3h(float16(x), float16(y), float16(z))` |
 | `Vector2d` | `Matrix<double,2,1>` | `Vector2d(x, y)` |
 | `Vector3d` | `Matrix<double,3,1>` | `Vector3d(x, y, z)` |
 | `Vector4d` | `Matrix<double,4,1>` | `Vector4d(x, y, z, w)` |
@@ -46,6 +47,7 @@ Import types and functions, pass `links()` to `@cuda.jit`, and use them directly
 | `Matrix2f` | `Matrix<float,2,2>` | `Matrix2f(c0r0, c0r1, c1r0, c1r1)` |
 | `Matrix3f` | `Matrix<float,3,3>` | `Matrix3f(c0r0, c0r1, ..., c2r2)` — 9 args |
 | `Matrix4f` | `Matrix<float,4,4>` | `Matrix4f(c0r0, c0r1, ..., c3r3)` — 16 args |
+| `Matrix3h` | `Matrix<half,3,3>` | `Matrix3h(float16(c0r0), ..., float16(c2r2))` — 9 args |
 | `Matrix2d` | `Matrix<double,2,2>` | `Matrix2d(c0r0, c0r1, c1r0, c1r1)` |
 | `Matrix3d` | `Matrix<double,3,3>` | `Matrix3d(c0r0, c0r1, ..., c2r2)` — 9 args |
 | `Matrix4d` | `Matrix<double,4,4>` | `Matrix4d(c0r0, c0r1, ..., c3r3)` — 16 args |

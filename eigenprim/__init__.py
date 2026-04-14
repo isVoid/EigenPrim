@@ -41,6 +41,7 @@ _LAZY_IMPORTS = {
 for _type_name in [
     "Vector2f", "Vector3f", "Vector4f", "Vector2d", "Vector3d", "Vector4d",
     "Matrix2f", "Matrix3f", "Matrix4f", "Matrix2d", "Matrix3d", "Matrix4d",
+    "Vector3h", "Matrix3h",
 ]:
     _LAZY_IMPORTS[_type_name] = ("eigenprim.matrix", _type_name)
 
@@ -74,6 +75,15 @@ for _mt, _vt in _MAT_VEC_PAIRS:
         _LAZY_IMPORTS[_name] = ("eigenprim.matrix", _name)
     _name = f"eigen_{_mt}_{_vt}_mul"
     _LAZY_IMPORTS[_name] = ("eigenprim.matrix", _name)
+
+# Half-precision functions
+for _op in ["add", "sub", "dot", "norm", "normalized", "cross"]:
+    _name = f"eigen_vec3h_{_op}"
+    _LAZY_IMPORTS[_name] = ("eigenprim.matrix", _name)
+for _op in ["mul", "determinant", "inverse", "transpose"]:
+    _name = f"eigen_mat3h_{_op}"
+    _LAZY_IMPORTS[_name] = ("eigenprim.matrix", _name)
+_LAZY_IMPORTS["eigen_mat3h_vec3h_mul"] = ("eigenprim.matrix", "eigen_mat3h_vec3h_mul")
 
 # ── Public API ────────────────────────────────────────────────────
 

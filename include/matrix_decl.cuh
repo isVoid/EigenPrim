@@ -229,3 +229,23 @@ __device__ EigenMat4d eigen_mat4d_scale(EigenMat4d m, double s);
 __device__ double eigen_mat4d_norm(EigenMat4d m);
 __device__ double eigen_mat4d_squared_norm(EigenMat4d m);
 __device__ EigenVec4d eigen_mat4d_diagonal(EigenMat4d m);
+
+// ── Vector3h (half-precision) ────────────────────────────────────
+
+using EigenVec3h = Eigen::Matrix<Eigen::half, 3, 1>;
+using EigenMat3h = Eigen::Matrix<Eigen::half, 3, 3>;
+
+__device__ EigenVec3h eigen_vec3h_add(EigenVec3h a, EigenVec3h b);
+__device__ EigenVec3h eigen_vec3h_sub(EigenVec3h a, EigenVec3h b);
+__device__ Eigen::half eigen_vec3h_dot(EigenVec3h a, EigenVec3h b);
+__device__ Eigen::half eigen_vec3h_norm(EigenVec3h v);
+__device__ EigenVec3h eigen_vec3h_normalized(EigenVec3h v);
+__device__ EigenVec3h eigen_vec3h_cross(EigenVec3h a, EigenVec3h b);
+
+// ── Matrix3h (half-precision) ────────────────────────────────────
+
+__device__ EigenMat3h eigen_mat3h_mul(EigenMat3h a, EigenMat3h b);
+__device__ EigenVec3h eigen_mat3h_vec3h_mul(EigenMat3h m, EigenVec3h v);
+__device__ Eigen::half eigen_mat3h_determinant(EigenMat3h m);
+__device__ EigenMat3h eigen_mat3h_inverse(EigenMat3h m);
+__device__ EigenMat3h eigen_mat3h_transpose(EigenMat3h m);

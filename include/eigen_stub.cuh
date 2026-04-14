@@ -13,6 +13,12 @@
 
 namespace Eigen {
 
+// Stub half/bfloat16 — 2-byte types layout-compatible with real Eigen scalars.
+// The real Eigen::half wraps __half; the real Eigen::bfloat16 wraps __nv_bfloat16.
+// These stubs match sizeof=2, alignof=2 so Matrix<half,R,C> has correct layout.
+struct half { unsigned short x; __host__ __device__ half() {} };
+struct bfloat16 { unsigned short x; __host__ __device__ bfloat16() {} };
+
 template <typename Scalar, int Rows, int Cols,
           int Options = 0, int MaxRows = Rows, int MaxCols = Cols>
 struct Matrix {
