@@ -1,13 +1,13 @@
 """Test numbast binding generation for Eigen-wrapping CUDA headers.
 
-Level 1: Thin wrapper (Vec3f struct + plain device functions)
+Vec3f bindings (thin wrappers):
   - This should work end-to-end because Vec3f is a simple struct with scalar fields.
   - The end-to-end kernel uses a split-header approach:
     - Declarations-only header (no Eigen) for the NVRTC-compiled shim
     - Implementations pre-compiled to fatbin by nvcc (with Eigen)
 
-Level 2: Direct Eigen types (Eigen::Matrix<float,3,1> as params)
-  - This is expected to hit limitations: Eigen::Matrix is not a numbast-generated
+Matrix bindings (direct Eigen types):
+  - Expected to hit limitations: Eigen::Matrix is not a numbast-generated
     struct, so bind_cxx_function won't know how to lower it.
 """
 
@@ -26,7 +26,7 @@ INCLUDE_DIR = os.path.join(PROJECT_ROOT, "include")
 EIGEN_INCLUDE = os.path.join(
     PROJECT_ROOT, ".pixi", "envs", "default", "include", "eigen3"
 )
-DECL_HEADER = os.path.join(INCLUDE_DIR, "eigen_wrapper_l1_decl.cuh")
+DECL_HEADER = os.path.join(INCLUDE_DIR, "vec3f_decl.cuh")
 CC = "sm_80"
 
 
@@ -42,22 +42,22 @@ def _parse(header_name, bypass_errors=False, extra_retain=None):
     )
 
 
-# ---- Level 1 Bindings: Thin wrappers ----
+# ---- Vec3f Bindings ----
 
-class TestLevel1Bindings:
-    """Test numbast binding generation for Level 1 (thin wrappers).
+class TestVec3fBindings:
+    """Test numbast binding generation for Vec3f (thin wrappers).
     Vec3f is a simple struct with float x,y,z - should be bindable."""
 
     @pytest.fixture(scope="class")
     def parsed(self):
-        return _parse("eigen_wrapper_l1.cuh", extra_retain=["eigen_wrapper_l1_decl.cuh"])
+        return _parse("vec3f.cuh", extra_retain=["vec3f_decl.cuh"])
 
     def test_bind_vec3f_struct(self, parsed):
         from numbast import bind_cxx_struct, MemoryShimWriter
         from numba import types
         from numba.cuda.datamodel.models import StructModel
 
-        source = os.path.join(INCLUDE_DIR, "eigen_wrapper_l1.cuh")
+        source = os.path.join(INCLUDE_DIR, "vec3f.cuh")
         shim_writer = MemoryShimWriter(f'#include "{source}"')
 
         vec3f_struct = [s for s in parsed.structs if s.name == "Vec3f"][0]
@@ -85,7 +85,7 @@ class TestLevel1Bindings:
         from numba import types
         from numba.cuda.datamodel.models import StructModel
 
-        source = os.path.join(INCLUDE_DIR, "eigen_wrapper_l1.cuh")
+        source = os.path.join(INCLUDE_DIR, "vec3f.cuh")
         shim_writer = MemoryShimWriter(f'#include "{source}"')
 
         vec3f_struct = [s for s in parsed.structs if s.name == "Vec3f"][0]
@@ -138,9 +138,9 @@ class TestLevel1Bindings:
         arch = f"sm_{device.compute_capability[0]}{device.compute_capability[1]}"
 
         # Pre-compile Eigen implementations with nvcc
-        impl_cu = os.path.join(INCLUDE_DIR, "eigen_wrapper_l1_impl.cu")
+        impl_cu = os.path.join(INCLUDE_DIR, "vec3f.cu")
         tmpdir = tempfile.mkdtemp(prefix="numbast_eigen_")
-        fatbin_path = os.path.join(tmpdir, "eigen_wrapper_l1_impl.fatbin")
+        fatbin_path = os.path.join(tmpdir, "vec3f.fatbin")
         try:
             nvcc = shutil.which("nvcc")
             if nvcc is None:
@@ -199,15 +199,15 @@ class TestLevel1Bindings:
         print(f"\nKernel executed successfully: dot({'{1,2,3}'}, {'{4,5,6}'}) = {out[0]}")
 
 
-# ---- Level 2 Bindings: Direct Eigen types ----
+# ---- Matrix Bindings ----
 
-class TestLevel2Bindings:
+class TestMatrixBindings:
     """Test binding generation for functions using Eigen types directly.
     Expected to hit gaps: Eigen::Matrix is not a numbast-bound type."""
 
     @pytest.fixture(scope="class")
     def parsed(self):
-        return _parse("eigen_wrapper_l2.cuh", bypass_errors=True)
+        return _parse("matrix.cuh", bypass_errors=True)
 
     def test_bind_eigen_functions_succeeds(self, parsed):
         """bind_cxx_function succeeds for Eigen-type functions because it only
@@ -216,7 +216,7 @@ class TestLevel2Bindings:
         CUSource references Eigen types that NVRTC cannot compile."""
         from numbast import bind_cxx_function, MemoryShimWriter
 
-        source = os.path.join(INCLUDE_DIR, "eigen_wrapper_l2.cuh")
+        source = os.path.join(INCLUDE_DIR, "matrix.cuh")
         shim_writer = MemoryShimWriter(f'#include "{source}"')
 
         results = {"bound": [], "failed": []}
@@ -229,7 +229,7 @@ class TestLevel2Bindings:
             except Exception as e:
                 results["failed"].append((func.name, type(e).__name__, str(e)[:200]))
 
-        print(f"\nLevel 2 binding results:")
+        print(f"\nMatrix binding results:")
         print(f"  Bound: {results['bound']}")
         for name, etype, msg in results["failed"]:
             print(f"  Failed: {name} ({etype}): {msg}")

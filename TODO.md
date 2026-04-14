@@ -1,4 +1,4 @@
-# TODO — Numbast × Eigen Binding Experiment
+# TODO — Eigenprim
 
 _Last updated: 2026-04-13_
 
@@ -6,18 +6,19 @@ _Last updated: 2026-04-13_
 
 - [x] Set up project: `pixi.toml` with eigen, numbast deps, CUDA 12.9
 - [x] Build ast_canopy + install numbast into pixi env
-- [x] Create Level 1 header: thin wrapper (`Vec3f` struct + `__device__` functions calling Eigen internally)
-- [x] Create Level 2 header: functions using `Eigen::Matrix<float,3,1>` directly as params/returns
-- [x] Create Level 3 header: function templates + class templates wrapping Eigen
-- [x] Test ast_canopy **parsing** — all three levels parse successfully (20 tests)
-- [x] Test numbast **binding generation** — L1 struct + all 6 device functions bind successfully
-- [x] Test L2 binding generation — all 9 Eigen-type functions bind successfully (overturns earlier assumption)
+- [x] Create Vec3f header: thin wrapper (`Vec3f` struct + `__device__` functions calling Eigen internally)
+- [x] Create Matrix header: functions using `Eigen::Matrix<float,3,1>` directly as params/returns
+- [x] Create Generic header: function templates + class templates wrapping Eigen
+- [x] Test ast_canopy **parsing** — all three header sets parse successfully (20 tests)
+- [x] Test numbast **binding generation** — Vec3f struct + all 6 device functions bind successfully
+- [x] Test Matrix binding generation — all 9 Eigen-type functions bind successfully
 - [x] Diagnose end-to-end kernel failure: NVRTC cannot compile Eigen (system headers missing)
-- [x] Implement split-header approach for L1 end-to-end kernel:
-  - Created `eigen_wrapper_l1_decl.cuh` (declarations only, no Eigen, NVRTC-safe)
-  - Refactored `eigen_wrapper_l1.cuh` to include decl header
-  - Created `eigen_wrapper_l1_impl.cu` (nvcc compilation unit)
+- [x] Implement split-header approach for Vec3f end-to-end kernel:
+  - Created `vec3f_decl.cuh` (declarations only, no Eigen, NVRTC-safe)
+  - Refactored `vec3f.cuh` to include decl header
+  - Created `vec3f.cu` (nvcc compilation unit)
   - Test pre-compiles with nvcc, shim uses decl header, links fatbin
+- [x] Restructure as importable library (direct `from eigenprim import Vec3f, links`)
 
 ## Needs GPU to Validate
 
@@ -28,7 +29,7 @@ _Last updated: 2026-04-13_
 
 ## Remaining Work
 
-- [ ] Test Level 3 binding with `bind_cxx_function_templates` / `bind_cxx_class_templates`
+- [ ] Test Generic binding with `bind_cxx_function_templates` / `bind_cxx_class_templates`
 - [ ] Investigate whether Eigen `Matrix<float,3,1>` can be bound as a numbast struct (parse with `files_to_retain` including Eigen internals)
 - [ ] Benchmark: measure overhead of thin-wrapper approach vs direct Eigen type binding
 - [ ] Document all feature gaps found

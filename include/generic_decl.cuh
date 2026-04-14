@@ -1,6 +1,6 @@
-// Level 3: Declarations-only header for template wrappers.
+// Generic: Declarations-only header for template wrappers.
 // No Eigen dependency — safe for NVRTC compilation (used by numbast shims).
-// The implementations live in eigen_wrapper_l3.cuh (compiled separately by nvcc).
+// Implementations are in generic.cuh (compiled separately by nvcc).
 
 #pragma once
 

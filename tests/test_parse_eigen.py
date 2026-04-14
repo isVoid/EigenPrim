@@ -1,4 +1,4 @@
-"""Test ast_canopy parsing of Eigen-based CUDA headers at multiple complexity levels."""
+"""Test ast_canopy parsing of Eigen-based CUDA headers."""
 
 import os
 import sys
@@ -32,15 +32,15 @@ def _parse(header_name, bypass_errors=False, verbose=False, extra_retain=None):
     )
 
 
-# ---- Level 1: Thin wrappers (plain structs + device functions) ----
+# ---- Vec3f: Thin wrappers (plain structs + device functions) ----
 
-class TestLevel1ThinWrappers:
-    """Level 1: Plain structs and device functions that internally call Eigen.
+class TestVec3fParsing:
+    """Vec3f: Plain structs and device functions that internally call Eigen.
     This should work out of the box since the API surface is simple C++ types."""
 
     @pytest.fixture(scope="class")
     def decls(self):
-        return _parse("eigen_wrapper_l1.cuh", extra_retain=["eigen_wrapper_l1_decl.cuh"])
+        return _parse("vec3f.cuh", extra_retain=["vec3f_decl.cuh"])
 
     def test_parsing_succeeds(self, decls):
         assert decls is not None
@@ -93,22 +93,22 @@ class TestLevel1ThinWrappers:
                 assert len(func.params) == 2
 
 
-# ---- Level 2: Direct Eigen type usage ----
+# ---- Matrix: Direct Eigen type usage ----
 
-class TestLevel2DirectEigenTypes:
-    """Level 2: Functions using Eigen's Matrix<float,3,1> as parameters/return types.
+class TestMatrixParsing:
+    """Matrix: Functions using Eigen's Matrix<float,3,1> as parameters/return types.
     This probes how ast_canopy handles complex template specializations in APIs."""
 
     @pytest.fixture(scope="class")
     def decls(self):
-        return _parse("eigen_wrapper_l2.cuh", bypass_errors=True)
+        return _parse("matrix.cuh", bypass_errors=True)
 
     def test_parsing_succeeds(self, decls):
         assert decls is not None
 
     def test_functions_found(self, decls):
         func_names = [f.name for f in decls.functions]
-        print(f"L2 functions found: {func_names}")
+        print(f"Matrix functions found: {func_names}")
         expected = [
             "eigen_vec3f_add", "eigen_vec3f_dot", "eigen_vec3f_cross",
             "eigen_vec3f_norm",
@@ -119,7 +119,7 @@ class TestLevel2DirectEigenTypes:
 
     def test_typedefs_found(self, decls):
         typedef_names = [t.name for t in decls.typedefs]
-        print(f"L2 typedefs found: {typedef_names}")
+        print(f"Matrix typedefs found: {typedef_names}")
 
     def test_function_return_type_info(self, decls):
         """Inspect what ast_canopy reports for Eigen return types."""
@@ -132,38 +132,38 @@ class TestLevel2DirectEigenTypes:
     def test_class_templates_from_eigen(self, decls):
         """Check if Eigen's Matrix class template is picked up."""
         ct_names = [ct.qual_name for ct in decls.class_templates]
-        print(f"L2 class templates: {ct_names}")
+        print(f"Matrix class templates: {ct_names}")
 
     def test_class_template_specializations(self, decls):
         """Check if concrete specializations like Matrix<float,3,1> are captured."""
         cts_names = [cts.name for cts in decls.class_template_specializations]
-        print(f"L2 class template specializations: {cts_names}")
+        print(f"Matrix class template specializations: {cts_names}")
 
 
-# ---- Level 3: Template wrappers ----
+# ---- Generic: Template wrappers ----
 
-class TestLevel3TemplateWrappers:
-    """Level 3: Function templates and class templates wrapping Eigen.
+class TestGenericParsing:
+    """Generic: Function templates and class templates wrapping Eigen.
     Tests template parsing + explicit instantiation capture."""
 
     @pytest.fixture(scope="class")
     def decls(self):
-        return _parse("eigen_wrapper_l3.cuh", bypass_errors=True,
-                       extra_retain=["eigen_wrapper_l3_decl.cuh"])
+        return _parse("generic.cuh", bypass_errors=True,
+                       extra_retain=["generic_decl.cuh"])
 
     def test_parsing_succeeds(self, decls):
         assert decls is not None
 
     def test_function_templates_found(self, decls):
         ft_names = [ft.qual_name for ft in decls.function_templates]
-        print(f"L3 function templates: {ft_names}")
+        print(f"Generic function templates: {ft_names}")
         assert any("templated_dot3" in n for n in ft_names), (
             f"templated_dot3 not found in {ft_names}"
         )
 
     def test_class_templates_found(self, decls):
         ct_names = [ct.qual_name for ct in decls.class_templates]
-        print(f"L3 class templates: {ct_names}")
+        print(f"Generic class templates: {ct_names}")
         assert any("EigenVecWrapper" in n for n in ct_names), (
             f"EigenVecWrapper not found in {ct_names}"
         )

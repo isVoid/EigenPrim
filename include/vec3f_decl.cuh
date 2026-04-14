@@ -1,6 +1,6 @@
-// Level 1: Declarations-only header for Vec3f and device functions.
+// Vec3f: Declarations-only header for Vec3f struct and device functions.
 // No Eigen dependency — safe for NVRTC compilation (used by numbast shims).
-// The implementations live in eigen_wrapper_l1.cuh (compiled separately by nvcc).
+// Implementations are in vec3f.cuh (compiled separately by nvcc).
 
 #pragma once
 

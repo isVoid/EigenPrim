@@ -1,15 +1,12 @@
-// Level 3: Template wrapper functions.
-// Tests whether numbast can handle function templates and class templates
-// that wrap Eigen internally.
+// Generic: Template wrapper functions over Eigen.
 //
-// The EigenVecWrapper struct and function template declarations are in
-// eigen_wrapper_l3_decl.cuh (Eigen-free, safe for NVRTC).
+// Declarations are in generic_decl.cuh (Eigen-free, safe for NVRTC).
 // This file provides the Eigen-based implementations.
 
 #pragma once
 
 #include <Eigen/Dense>
-#include "eigen_wrapper_l3_decl.cuh"
+#include "generic_decl.cuh"
 
 template <typename Scalar>
 __device__ Scalar templated_dot3(

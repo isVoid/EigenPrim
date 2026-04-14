@@ -2,11 +2,9 @@
 //
 // These provide just enough type info for NVRTC to compile shim functions
 // that accept/return Eigen::Matrix by pointer. The memory layout matches
-// the real Eigen::Matrix for fixed-size types (verified via ast_canopy
-// parsing of DenseStorage.h):
+// the real Eigen::Matrix for fixed-size types (column-major DenseStorage):
 //
-//   Matrix<float,3,1> = 12 bytes (float[3]), align 4
-//   Matrix<float,3,3> = 36 bytes (float[9]), align 4
+//   Matrix<Scalar,R,C> = sizeof(Scalar) * R * C bytes, align = alignof(Scalar)
 //
 // The actual Eigen implementations are compiled separately by nvcc
 // into a fatbin and linked at kernel JIT time.
@@ -22,19 +20,40 @@ struct Matrix {
 
   __host__ __device__ Matrix() {}
 
-  // Constructor for 3-vectors (Matrix<Scalar,3,1>)
+  // Constructor for 2-element types (Vector2)
+  __host__ __device__ Matrix(Scalar v0, Scalar v1) {
+    m_storage[0] = v0; m_storage[1] = v1;
+  }
+
+  // Constructor for 3-element types (Vector3)
   __host__ __device__ Matrix(Scalar v0, Scalar v1, Scalar v2) {
     m_storage[0] = v0; m_storage[1] = v1; m_storage[2] = v2;
   }
 
-  // Constructor for 3x3 matrices (Matrix<Scalar,3,3>), column-major order
-  // m_storage layout: [col0_row0, col0_row1, col0_row2, col1_row0, ...]
+  // Constructor for 4-element types (Vector4 / Matrix2x2), column-major
+  __host__ __device__ Matrix(Scalar v0, Scalar v1, Scalar v2, Scalar v3) {
+    m_storage[0] = v0; m_storage[1] = v1;
+    m_storage[2] = v2; m_storage[3] = v3;
+  }
+
+  // Constructor for 9-element types (Matrix3x3), column-major
   __host__ __device__ Matrix(Scalar c0r0, Scalar c0r1, Scalar c0r2,
                              Scalar c1r0, Scalar c1r1, Scalar c1r2,
                              Scalar c2r0, Scalar c2r1, Scalar c2r2) {
     m_storage[0] = c0r0; m_storage[1] = c0r1; m_storage[2] = c0r2;
     m_storage[3] = c1r0; m_storage[4] = c1r1; m_storage[5] = c1r2;
     m_storage[6] = c2r0; m_storage[7] = c2r1; m_storage[8] = c2r2;
+  }
+
+  // Constructor for 16-element types (Matrix4x4), column-major
+  __host__ __device__ Matrix(Scalar c0r0, Scalar c0r1, Scalar c0r2, Scalar c0r3,
+                             Scalar c1r0, Scalar c1r1, Scalar c1r2, Scalar c1r3,
+                             Scalar c2r0, Scalar c2r1, Scalar c2r2, Scalar c2r3,
+                             Scalar c3r0, Scalar c3r1, Scalar c3r2, Scalar c3r3) {
+    m_storage[0]  = c0r0; m_storage[1]  = c0r1; m_storage[2]  = c0r2; m_storage[3]  = c0r3;
+    m_storage[4]  = c1r0; m_storage[5]  = c1r1; m_storage[6]  = c1r2; m_storage[7]  = c1r3;
+    m_storage[8]  = c2r0; m_storage[9]  = c2r1; m_storage[10] = c2r2; m_storage[11] = c2r3;
+    m_storage[12] = c3r0; m_storage[13] = c3r1; m_storage[14] = c3r2; m_storage[15] = c3r3;
   }
 };
 

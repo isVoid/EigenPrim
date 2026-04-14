@@ -1,14 +1,12 @@
-// Level 1: Thin wrapper functions around Eigen fixed-size types.
-// These expose Eigen functionality through plain __device__ functions
-// with concrete types that numbast can more easily parse.
+// Vec3f: Thin wrapper functions around Eigen fixed-size vectors.
 //
-// The Vec3f struct and function declarations are in eigen_wrapper_l1_decl.cuh
-// (Eigen-free, safe for NVRTC). This file provides the implementations.
+// Declarations are in vec3f_decl.cuh (Eigen-free, safe for NVRTC).
+// This file provides the Eigen-based implementations.
 
 #pragma once
 
 #include <Eigen/Dense>
-#include "eigen_wrapper_l1_decl.cuh"
+#include "vec3f_decl.cuh"
 
 // ---- Vector3f wrapper implementations ----
 

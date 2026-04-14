@@ -1,0 +1,153 @@
+// Matrix: Declarations-only header for Eigen vector and matrix functions.
+// Uses the NVRTC-safe Eigen stub (no real Eigen dependency).
+// Implementations are in matrix.cuh (compiled separately by nvcc).
+
+#pragma once
+
+#include "eigen_stub.cuh"
+
+// ── Type aliases ─────────────────────────────────────────────────
+
+// Vectors
+using EigenVec2f = Eigen::Matrix<float, 2, 1>;
+using EigenVec3f = Eigen::Matrix<float, 3, 1>;
+using EigenVec4f = Eigen::Matrix<float, 4, 1>;
+using EigenVec2d = Eigen::Matrix<double, 2, 1>;
+using EigenVec3d = Eigen::Matrix<double, 3, 1>;
+using EigenVec4d = Eigen::Matrix<double, 4, 1>;
+
+// Matrices
+using EigenMat2f = Eigen::Matrix<float, 2, 2>;
+using EigenMat3f = Eigen::Matrix<float, 3, 3>;
+using EigenMat4f = Eigen::Matrix<float, 4, 4>;
+using EigenMat2d = Eigen::Matrix<double, 2, 2>;
+using EigenMat3d = Eigen::Matrix<double, 3, 3>;
+using EigenMat4d = Eigen::Matrix<double, 4, 4>;
+
+// ── Vector2f ─────────────────────────────────────────────────────
+
+__device__ EigenVec2f eigen_vec2f_add(EigenVec2f a, EigenVec2f b);
+__device__ EigenVec2f eigen_vec2f_sub(EigenVec2f a, EigenVec2f b);
+__device__ float eigen_vec2f_dot(EigenVec2f a, EigenVec2f b);
+__device__ float eigen_vec2f_norm(EigenVec2f v);
+__device__ float eigen_vec2f_squared_norm(EigenVec2f v);
+__device__ EigenVec2f eigen_vec2f_normalized(EigenVec2f v);
+__device__ EigenVec2f eigen_vec2f_scale(EigenVec2f v, float s);
+
+// ── Vector3f ─────────────────────────────────────────────────────
+
+__device__ EigenVec3f eigen_vec3f_add(EigenVec3f a, EigenVec3f b);
+__device__ EigenVec3f eigen_vec3f_sub(EigenVec3f a, EigenVec3f b);
+__device__ float eigen_vec3f_dot(EigenVec3f a, EigenVec3f b);
+__device__ float eigen_vec3f_norm(EigenVec3f v);
+__device__ float eigen_vec3f_squared_norm(EigenVec3f v);
+__device__ EigenVec3f eigen_vec3f_normalized(EigenVec3f v);
+__device__ EigenVec3f eigen_vec3f_scale(EigenVec3f v, float s);
+__device__ EigenVec3f eigen_vec3f_cross(EigenVec3f a, EigenVec3f b);
+
+// ── Vector4f ─────────────────────────────────────────────────────
+
+__device__ EigenVec4f eigen_vec4f_add(EigenVec4f a, EigenVec4f b);
+__device__ EigenVec4f eigen_vec4f_sub(EigenVec4f a, EigenVec4f b);
+__device__ float eigen_vec4f_dot(EigenVec4f a, EigenVec4f b);
+__device__ float eigen_vec4f_norm(EigenVec4f v);
+__device__ float eigen_vec4f_squared_norm(EigenVec4f v);
+__device__ EigenVec4f eigen_vec4f_normalized(EigenVec4f v);
+__device__ EigenVec4f eigen_vec4f_scale(EigenVec4f v, float s);
+
+// ── Vector2d ─────────────────────────────────────────────────────
+
+__device__ EigenVec2d eigen_vec2d_add(EigenVec2d a, EigenVec2d b);
+__device__ EigenVec2d eigen_vec2d_sub(EigenVec2d a, EigenVec2d b);
+__device__ double eigen_vec2d_dot(EigenVec2d a, EigenVec2d b);
+__device__ double eigen_vec2d_norm(EigenVec2d v);
+__device__ double eigen_vec2d_squared_norm(EigenVec2d v);
+__device__ EigenVec2d eigen_vec2d_normalized(EigenVec2d v);
+__device__ EigenVec2d eigen_vec2d_scale(EigenVec2d v, double s);
+
+// ── Vector3d ─────────────────────────────────────────────────────
+
+__device__ EigenVec3d eigen_vec3d_add(EigenVec3d a, EigenVec3d b);
+__device__ EigenVec3d eigen_vec3d_sub(EigenVec3d a, EigenVec3d b);
+__device__ double eigen_vec3d_dot(EigenVec3d a, EigenVec3d b);
+__device__ double eigen_vec3d_norm(EigenVec3d v);
+__device__ double eigen_vec3d_squared_norm(EigenVec3d v);
+__device__ EigenVec3d eigen_vec3d_normalized(EigenVec3d v);
+__device__ EigenVec3d eigen_vec3d_scale(EigenVec3d v, double s);
+__device__ EigenVec3d eigen_vec3d_cross(EigenVec3d a, EigenVec3d b);
+
+// ── Vector4d ─────────────────────────────────────────────────────
+
+__device__ EigenVec4d eigen_vec4d_add(EigenVec4d a, EigenVec4d b);
+__device__ EigenVec4d eigen_vec4d_sub(EigenVec4d a, EigenVec4d b);
+__device__ double eigen_vec4d_dot(EigenVec4d a, EigenVec4d b);
+__device__ double eigen_vec4d_norm(EigenVec4d v);
+__device__ double eigen_vec4d_squared_norm(EigenVec4d v);
+__device__ EigenVec4d eigen_vec4d_normalized(EigenVec4d v);
+__device__ EigenVec4d eigen_vec4d_scale(EigenVec4d v, double s);
+
+// ── Matrix2f ─────────────────────────────────────────────────────
+
+__device__ EigenMat2f eigen_mat2f_add(EigenMat2f a, EigenMat2f b);
+__device__ EigenMat2f eigen_mat2f_sub(EigenMat2f a, EigenMat2f b);
+__device__ EigenMat2f eigen_mat2f_mul(EigenMat2f a, EigenMat2f b);
+__device__ EigenVec2f eigen_mat2f_vec2f_mul(EigenMat2f m, EigenVec2f v);
+__device__ float eigen_mat2f_determinant(EigenMat2f m);
+__device__ EigenMat2f eigen_mat2f_inverse(EigenMat2f m);
+__device__ EigenMat2f eigen_mat2f_transpose(EigenMat2f m);
+__device__ float eigen_mat2f_trace(EigenMat2f m);
+
+// ── Matrix3f ─────────────────────────────────────────────────────
+
+__device__ EigenMat3f eigen_mat3f_add(EigenMat3f a, EigenMat3f b);
+__device__ EigenMat3f eigen_mat3f_sub(EigenMat3f a, EigenMat3f b);
+__device__ EigenMat3f eigen_mat3f_mul(EigenMat3f a, EigenMat3f b);
+__device__ EigenVec3f eigen_mat3f_vec3f_mul(EigenMat3f m, EigenVec3f v);
+__device__ float eigen_mat3f_determinant(EigenMat3f m);
+__device__ EigenMat3f eigen_mat3f_inverse(EigenMat3f m);
+__device__ EigenMat3f eigen_mat3f_transpose(EigenMat3f m);
+__device__ float eigen_mat3f_trace(EigenMat3f m);
+
+// ── Matrix4f ─────────────────────────────────────────────────────
+
+__device__ EigenMat4f eigen_mat4f_add(EigenMat4f a, EigenMat4f b);
+__device__ EigenMat4f eigen_mat4f_sub(EigenMat4f a, EigenMat4f b);
+__device__ EigenMat4f eigen_mat4f_mul(EigenMat4f a, EigenMat4f b);
+__device__ EigenVec4f eigen_mat4f_vec4f_mul(EigenMat4f m, EigenVec4f v);
+__device__ float eigen_mat4f_determinant(EigenMat4f m);
+__device__ EigenMat4f eigen_mat4f_inverse(EigenMat4f m);
+__device__ EigenMat4f eigen_mat4f_transpose(EigenMat4f m);
+__device__ float eigen_mat4f_trace(EigenMat4f m);
+
+// ── Matrix2d ─────────────────────────────────────────────────────
+
+__device__ EigenMat2d eigen_mat2d_add(EigenMat2d a, EigenMat2d b);
+__device__ EigenMat2d eigen_mat2d_sub(EigenMat2d a, EigenMat2d b);
+__device__ EigenMat2d eigen_mat2d_mul(EigenMat2d a, EigenMat2d b);
+__device__ EigenVec2d eigen_mat2d_vec2d_mul(EigenMat2d m, EigenVec2d v);
+__device__ double eigen_mat2d_determinant(EigenMat2d m);
+__device__ EigenMat2d eigen_mat2d_inverse(EigenMat2d m);
+__device__ EigenMat2d eigen_mat2d_transpose(EigenMat2d m);
+__device__ double eigen_mat2d_trace(EigenMat2d m);
+
+// ── Matrix3d ─────────────────────────────────────────────────────
+
+__device__ EigenMat3d eigen_mat3d_add(EigenMat3d a, EigenMat3d b);
+__device__ EigenMat3d eigen_mat3d_sub(EigenMat3d a, EigenMat3d b);
+__device__ EigenMat3d eigen_mat3d_mul(EigenMat3d a, EigenMat3d b);
+__device__ EigenVec3d eigen_mat3d_vec3d_mul(EigenMat3d m, EigenVec3d v);
+__device__ double eigen_mat3d_determinant(EigenMat3d m);
+__device__ EigenMat3d eigen_mat3d_inverse(EigenMat3d m);
+__device__ EigenMat3d eigen_mat3d_transpose(EigenMat3d m);
+__device__ double eigen_mat3d_trace(EigenMat3d m);
+
+// ── Matrix4d ─────────────────────────────────────────────────────
+
+__device__ EigenMat4d eigen_mat4d_add(EigenMat4d a, EigenMat4d b);
+__device__ EigenMat4d eigen_mat4d_sub(EigenMat4d a, EigenMat4d b);
+__device__ EigenMat4d eigen_mat4d_mul(EigenMat4d a, EigenMat4d b);
+__device__ EigenVec4d eigen_mat4d_vec4d_mul(EigenMat4d m, EigenVec4d v);
+__device__ double eigen_mat4d_determinant(EigenMat4d m);
+__device__ EigenMat4d eigen_mat4d_inverse(EigenMat4d m);
+__device__ EigenMat4d eigen_mat4d_transpose(EigenMat4d m);
+__device__ double eigen_mat4d_trace(EigenMat4d m);
