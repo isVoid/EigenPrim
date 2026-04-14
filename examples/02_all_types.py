@@ -4,7 +4,7 @@ Eigenprim: Direct Eigen::Matrix types with operator syntax.
 Demonstrates Vector2f..Vector4f, Matrix2f..Matrix4f.
 Uses +, -, *, @ operators where possible, named functions for the rest.
 
-Run:  pixi run python example_l2.py
+Run:  pixi run python examples/02_all_types.py
 """
 
 import numpy as np

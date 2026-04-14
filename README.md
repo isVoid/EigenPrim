@@ -199,13 +199,13 @@ def kernel(out):
 ## Examples
 
 ```bash
-pixi run python example.py            # Vector3f basics with operators
-pixi run python example_l2.py         # All types: Vector2f..Matrix4f
-pixi run python example_l3.py         # Template bindings
-pixi run python example_transform.py  # Point cloud transform + linear solve
+pixi run python examples/01_vector_basics.py          # Vector3f dot, norm, add
+pixi run python examples/02_all_types.py              # All 12 types with operators
+pixi run python examples/03_templates.py              # Generic templated functions
+pixi run python examples/04_point_cloud_transform.py  # Batch transform + linear solve
 ```
 
-`example_transform.py` demonstrates a realistic pattern: rotating a 1024-point cloud with a rigid-body transform kernel (`R @ p + t`), then solving per-element linear systems via `inverse(A) @ b`. Results are verified against numpy.
+`04_point_cloud_transform.py` demonstrates a realistic pattern: rotating a 1024-point cloud with a rigid-body transform kernel (`R @ p + t`), then solving per-element linear systems via `inverse(A) @ b`. Results are verified against numpy.
 
 ## Custom Bindings
 

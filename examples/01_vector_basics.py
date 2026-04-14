@@ -3,7 +3,7 @@ Eigenprim: Vector3f basics.
 
 Just import and use. Operators (+, -, *, @) work naturally.
 
-Run:  pixi run python example.py
+Run:  pixi run python examples/01_vector_basics.py
 """
 
 import numpy as np

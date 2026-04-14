@@ -5,7 +5,7 @@ Each CUDA thread transforms one point by a rotation matrix + translation,
 then computes the distance from origin and projection onto a direction.
 Also demonstrates per-element linear system solve via inverse.
 
-Run:  pixi run python example_transform.py
+Run:  pixi run python examples/04_point_cloud_transform.py
 """
 
 import numpy as np
