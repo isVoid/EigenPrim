@@ -237,6 +237,6 @@ class TestMatrixBindings:
         # Binding generation succeeds — numbast generates shim text and
         # typing/lowering without checking if NVRTC can handle the types.
         # The gap is at shim compilation time, not bind time.
-        assert len(results["bound"]) == 9, (
-            f"Expected all 9 Eigen functions to bind, got {len(results['bound'])}"
+        assert len(results["bound"]) == 92, (
+            f"Expected all 92 Eigen functions to bind, got {len(results['bound'])}"
         )

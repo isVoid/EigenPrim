@@ -102,4 +102,9 @@ TYPE_NAMES = [
     "Matrix2f", "Matrix3f", "Matrix4f", "Matrix2d", "Matrix3d", "Matrix4d",
 ]
 
+# ── Operator overloads ────────────────────────────────────────────
+
+from eigenprim.operators import register_operators
+register_operators(_bindings.types, _bindings.functions)
+
 __all__ = TYPE_NAMES + FUNCTION_NAMES
