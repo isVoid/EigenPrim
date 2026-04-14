@@ -92,11 +92,11 @@ M = Matrix3f(1.0, 4.0, 7.0,   # col 0: rows 0,1,2
 
 ## Available Operations
 
-All functions follow the naming pattern `eigen_{type}_{op}`, where type is `vec2f`, `vec3f`, `vec4f`, `vec2d`, `vec3d`, `vec4d`, `mat2f`, `mat3f`, `mat4f`, `mat2d`, `mat3d`, or `mat4d`.
+All functions follow the naming pattern `eigen_{type}_{op}`, where type is any of the 24 type suffixes: `vec2f`..`vec4d`, `vec2h`..`vec4h`, `vec2bf`..`vec4bf`, `mat2f`..`mat4d`, `mat2h`..`mat4h`, `mat2bf`..`mat4bf`.
 
 ### Vector Operations
 
-Available for all 6 vector types (`vec2f` through `vec4d`):
+Available for all 12 vector types (float, double, half, bfloat16 x 2D/3D/4D):
 
 | Operation | Example | Returns |
 |---|---|---|
@@ -123,7 +123,7 @@ Scalar return type matches the vector's element type: `float` for `*f` types, `d
 
 ### Matrix Operations
 
-Available for all 6 matrix types (`mat2f` through `mat4d`):
+Available for all 12 matrix types (float, double, half, bfloat16 x 2x2/3x3/4x4):
 
 | Operation | Example | Returns |
 |---|---|---|
@@ -145,7 +145,7 @@ Matrix-vector multiply uses the pattern `eigen_{mattype}_{vectype}_mul` — for 
 
 ### Operator Syntax
 
-Standard Python operators are overloaded for all Eigen types, so you can write natural expressions in kernels:
+Standard Python operators are overloaded for all 24 Eigen types (including half and bfloat16), so you can write natural expressions in kernels:
 
 | Syntax | Vectors | Matrices |
 |---|---|---|
@@ -171,7 +171,7 @@ def kernel(out):
 
 ### Generic Functions
 
-All operations are available as type-dispatched generic functions, accessible as `eigenprim.{op}` or via direct import. They dispatch to the correct `eigen_{type}_{op}` at JIT compile time based on argument types.
+All operations are available as type-dispatched generic functions, accessible as `eigenprim.{op}` or via direct import. They dispatch to the correct `eigen_{type}_{op}` at JIT compile time based on argument types. Works across all 24 types (float, double, half, bfloat16).
 
 ```python
 from eigenprim import dot, norm, inverse, determinant, outer, diagonal

@@ -1,6 +1,6 @@
 """Pre-bound Eigen vector and matrix bindings.
 
-12 types (Vector2f..Vector4d, Matrix2f..Matrix4d) and 170 device functions.
+24 types (float, double, half, bfloat16 x Vec2/3/4, Mat2/3/4) and 340 device functions.
 
 Usage::
 
