@@ -41,6 +41,12 @@ def register_operators(types, functions):
         ("vec2d", "Eigen::Matrix<double, 2, 1>", nbtypes.float64),
         ("vec3d", "Eigen::Matrix<double, 3, 1>", nbtypes.float64),
         ("vec4d", "Eigen::Matrix<double, 4, 1>", nbtypes.float64),
+        ("vec2h", "Eigen::Matrix<Eigen::half, 2, 1>", nbtypes.float16),
+        ("vec3h", "Eigen::Matrix<Eigen::half, 3, 1>", nbtypes.float16),
+        ("vec4h", "Eigen::Matrix<Eigen::half, 4, 1>", nbtypes.float16),
+        ("vec2bf", "Eigen::Matrix<Eigen::bfloat16, 2, 1>", nbtypes.float16),
+        ("vec3bf", "Eigen::Matrix<Eigen::bfloat16, 3, 1>", nbtypes.float16),
+        ("vec4bf", "Eigen::Matrix<Eigen::bfloat16, 4, 1>", nbtypes.float16),
     ]
 
     _MAT_VEC_SPECS = [
@@ -50,6 +56,12 @@ def register_operators(types, functions):
         ("mat2d", "Eigen::Matrix<double, 2, 2>", "vec2d", "Eigen::Matrix<double, 2, 1>"),
         ("mat3d", "Eigen::Matrix<double, 3, 3>", "vec3d", "Eigen::Matrix<double, 3, 1>"),
         ("mat4d", "Eigen::Matrix<double, 4, 4>", "vec4d", "Eigen::Matrix<double, 4, 1>"),
+        ("mat2h", "Eigen::Matrix<Eigen::half, 2, 2>", "vec2h", "Eigen::Matrix<Eigen::half, 2, 1>"),
+        ("mat3h", "Eigen::Matrix<Eigen::half, 3, 3>", "vec3h", "Eigen::Matrix<Eigen::half, 3, 1>"),
+        ("mat4h", "Eigen::Matrix<Eigen::half, 4, 4>", "vec4h", "Eigen::Matrix<Eigen::half, 4, 1>"),
+        ("mat2bf", "Eigen::Matrix<Eigen::bfloat16, 2, 2>", "vec2bf", "Eigen::Matrix<Eigen::bfloat16, 2, 1>"),
+        ("mat3bf", "Eigen::Matrix<Eigen::bfloat16, 3, 3>", "vec3bf", "Eigen::Matrix<Eigen::bfloat16, 3, 1>"),
+        ("mat4bf", "Eigen::Matrix<Eigen::bfloat16, 4, 4>", "vec4bf", "Eigen::Matrix<Eigen::bfloat16, 4, 1>"),
     ]
 
     for vname, tkey, scalar_nbt in _VEC_SPECS:

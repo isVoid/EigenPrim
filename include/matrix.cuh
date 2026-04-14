@@ -228,22 +228,224 @@ __device__ double eigen_mat4d_norm(EigenMat4d m) { return m.norm(); }
 __device__ double eigen_mat4d_squared_norm(EigenMat4d m) { return m.squaredNorm(); }
 __device__ EigenVec4d eigen_mat4d_diagonal(EigenMat4d m) { return m.diagonal(); }
 
-// ── Vector3h (half-precision) ────────────────────────────────────
+// ── Half-precision type aliases ──────────────────────────────────
 
+using EigenVec2h = Eigen::Matrix<Eigen::half, 2, 1>;
 using EigenVec3h = Eigen::Matrix<Eigen::half, 3, 1>;
+using EigenVec4h = Eigen::Matrix<Eigen::half, 4, 1>;
+using EigenMat2h = Eigen::Matrix<Eigen::half, 2, 2>;
 using EigenMat3h = Eigen::Matrix<Eigen::half, 3, 3>;
+using EigenMat4h = Eigen::Matrix<Eigen::half, 4, 4>;
+
+using EigenVec2bf = Eigen::Matrix<Eigen::bfloat16, 2, 1>;
+using EigenVec3bf = Eigen::Matrix<Eigen::bfloat16, 3, 1>;
+using EigenVec4bf = Eigen::Matrix<Eigen::bfloat16, 4, 1>;
+using EigenMat2bf = Eigen::Matrix<Eigen::bfloat16, 2, 2>;
+using EigenMat3bf = Eigen::Matrix<Eigen::bfloat16, 3, 3>;
+using EigenMat4bf = Eigen::Matrix<Eigen::bfloat16, 4, 4>;
+
+// ── Vector2h ─────────────────────────────────────────────────────
+
+__device__ EigenVec2h eigen_vec2h_add(EigenVec2h a, EigenVec2h b) { return a + b; }
+__device__ EigenVec2h eigen_vec2h_sub(EigenVec2h a, EigenVec2h b) { return a - b; }
+__device__ Eigen::half eigen_vec2h_dot(EigenVec2h a, EigenVec2h b) { return a.dot(b); }
+__device__ Eigen::half eigen_vec2h_norm(EigenVec2h v) { return v.norm(); }
+__device__ Eigen::half eigen_vec2h_squared_norm(EigenVec2h v) { return v.squaredNorm(); }
+__device__ EigenVec2h eigen_vec2h_normalized(EigenVec2h v) { return v.normalized(); }
+__device__ EigenVec2h eigen_vec2h_scale(EigenVec2h v, Eigen::half s) { return v * s; }
+__device__ EigenVec2h eigen_vec2h_cwise_product(EigenVec2h a, EigenVec2h b) { return a.cwiseProduct(b); }
+__device__ EigenVec2h eigen_vec2h_cwise_abs(EigenVec2h v) { return v.cwiseAbs(); }
+__device__ EigenVec2h eigen_vec2h_cwise_min(EigenVec2h a, EigenVec2h b) { return a.cwiseMin(b); }
+__device__ EigenVec2h eigen_vec2h_cwise_max(EigenVec2h a, EigenVec2h b) { return a.cwiseMax(b); }
+__device__ Eigen::half eigen_vec2h_sum(EigenVec2h v) { return v.sum(); }
+__device__ Eigen::half eigen_vec2h_min_coeff(EigenVec2h v) { return v.minCoeff(); }
+__device__ Eigen::half eigen_vec2h_max_coeff(EigenVec2h v) { return v.maxCoeff(); }
+__device__ EigenMat2h eigen_vec2h_outer(EigenVec2h a, EigenVec2h b) { return a * b.transpose(); }
+
+// ── Vector3h ─────────────────────────────────────────────────────
 
 __device__ EigenVec3h eigen_vec3h_add(EigenVec3h a, EigenVec3h b) { return a + b; }
 __device__ EigenVec3h eigen_vec3h_sub(EigenVec3h a, EigenVec3h b) { return a - b; }
 __device__ Eigen::half eigen_vec3h_dot(EigenVec3h a, EigenVec3h b) { return a.dot(b); }
 __device__ Eigen::half eigen_vec3h_norm(EigenVec3h v) { return v.norm(); }
+__device__ Eigen::half eigen_vec3h_squared_norm(EigenVec3h v) { return v.squaredNorm(); }
 __device__ EigenVec3h eigen_vec3h_normalized(EigenVec3h v) { return v.normalized(); }
+__device__ EigenVec3h eigen_vec3h_scale(EigenVec3h v, Eigen::half s) { return v * s; }
 __device__ EigenVec3h eigen_vec3h_cross(EigenVec3h a, EigenVec3h b) { return a.cross(b); }
+__device__ EigenVec3h eigen_vec3h_cwise_product(EigenVec3h a, EigenVec3h b) { return a.cwiseProduct(b); }
+__device__ EigenVec3h eigen_vec3h_cwise_abs(EigenVec3h v) { return v.cwiseAbs(); }
+__device__ EigenVec3h eigen_vec3h_cwise_min(EigenVec3h a, EigenVec3h b) { return a.cwiseMin(b); }
+__device__ EigenVec3h eigen_vec3h_cwise_max(EigenVec3h a, EigenVec3h b) { return a.cwiseMax(b); }
+__device__ Eigen::half eigen_vec3h_sum(EigenVec3h v) { return v.sum(); }
+__device__ Eigen::half eigen_vec3h_min_coeff(EigenVec3h v) { return v.minCoeff(); }
+__device__ Eigen::half eigen_vec3h_max_coeff(EigenVec3h v) { return v.maxCoeff(); }
+__device__ EigenMat3h eigen_vec3h_outer(EigenVec3h a, EigenVec3h b) { return a * b.transpose(); }
 
-// ── Matrix3h (half-precision) ────────────────────────────────────
+// ── Vector4h ─────────────────────────────────────────────────────
 
+__device__ EigenVec4h eigen_vec4h_add(EigenVec4h a, EigenVec4h b) { return a + b; }
+__device__ EigenVec4h eigen_vec4h_sub(EigenVec4h a, EigenVec4h b) { return a - b; }
+__device__ Eigen::half eigen_vec4h_dot(EigenVec4h a, EigenVec4h b) { return a.dot(b); }
+__device__ Eigen::half eigen_vec4h_norm(EigenVec4h v) { return v.norm(); }
+__device__ Eigen::half eigen_vec4h_squared_norm(EigenVec4h v) { return v.squaredNorm(); }
+__device__ EigenVec4h eigen_vec4h_normalized(EigenVec4h v) { return v.normalized(); }
+__device__ EigenVec4h eigen_vec4h_scale(EigenVec4h v, Eigen::half s) { return v * s; }
+__device__ EigenVec4h eigen_vec4h_cwise_product(EigenVec4h a, EigenVec4h b) { return a.cwiseProduct(b); }
+__device__ EigenVec4h eigen_vec4h_cwise_abs(EigenVec4h v) { return v.cwiseAbs(); }
+__device__ EigenVec4h eigen_vec4h_cwise_min(EigenVec4h a, EigenVec4h b) { return a.cwiseMin(b); }
+__device__ EigenVec4h eigen_vec4h_cwise_max(EigenVec4h a, EigenVec4h b) { return a.cwiseMax(b); }
+__device__ Eigen::half eigen_vec4h_sum(EigenVec4h v) { return v.sum(); }
+__device__ Eigen::half eigen_vec4h_min_coeff(EigenVec4h v) { return v.minCoeff(); }
+__device__ Eigen::half eigen_vec4h_max_coeff(EigenVec4h v) { return v.maxCoeff(); }
+__device__ EigenMat4h eigen_vec4h_outer(EigenVec4h a, EigenVec4h b) { return a * b.transpose(); }
+
+// ── Matrix2h ─────────────────────────────────────────────────────
+
+__device__ EigenMat2h eigen_mat2h_add(EigenMat2h a, EigenMat2h b) { return a + b; }
+__device__ EigenMat2h eigen_mat2h_sub(EigenMat2h a, EigenMat2h b) { return a - b; }
+__device__ EigenMat2h eigen_mat2h_mul(EigenMat2h a, EigenMat2h b) { return a * b; }
+__device__ EigenVec2h eigen_mat2h_vec2h_mul(EigenMat2h m, EigenVec2h v) { return m * v; }
+__device__ Eigen::half eigen_mat2h_determinant(EigenMat2h m) { return m.determinant(); }
+__device__ EigenMat2h eigen_mat2h_inverse(EigenMat2h m) { return m.inverse(); }
+__device__ EigenMat2h eigen_mat2h_transpose(EigenMat2h m) { return m.transpose(); }
+__device__ Eigen::half eigen_mat2h_trace(EigenMat2h m) { return m.trace(); }
+__device__ EigenMat2h eigen_mat2h_cwise_product(EigenMat2h a, EigenMat2h b) { return a.cwiseProduct(b); }
+__device__ EigenMat2h eigen_mat2h_scale(EigenMat2h m, Eigen::half s) { return m * s; }
+__device__ Eigen::half eigen_mat2h_norm(EigenMat2h m) { return m.norm(); }
+__device__ Eigen::half eigen_mat2h_squared_norm(EigenMat2h m) { return m.squaredNorm(); }
+__device__ EigenVec2h eigen_mat2h_diagonal(EigenMat2h m) { return m.diagonal(); }
+
+// ── Matrix3h ─────────────────────────────────────────────────────
+
+__device__ EigenMat3h eigen_mat3h_add(EigenMat3h a, EigenMat3h b) { return a + b; }
+__device__ EigenMat3h eigen_mat3h_sub(EigenMat3h a, EigenMat3h b) { return a - b; }
 __device__ EigenMat3h eigen_mat3h_mul(EigenMat3h a, EigenMat3h b) { return a * b; }
 __device__ EigenVec3h eigen_mat3h_vec3h_mul(EigenMat3h m, EigenVec3h v) { return m * v; }
 __device__ Eigen::half eigen_mat3h_determinant(EigenMat3h m) { return m.determinant(); }
 __device__ EigenMat3h eigen_mat3h_inverse(EigenMat3h m) { return m.inverse(); }
 __device__ EigenMat3h eigen_mat3h_transpose(EigenMat3h m) { return m.transpose(); }
+__device__ Eigen::half eigen_mat3h_trace(EigenMat3h m) { return m.trace(); }
+__device__ EigenMat3h eigen_mat3h_cwise_product(EigenMat3h a, EigenMat3h b) { return a.cwiseProduct(b); }
+__device__ EigenMat3h eigen_mat3h_scale(EigenMat3h m, Eigen::half s) { return m * s; }
+__device__ Eigen::half eigen_mat3h_norm(EigenMat3h m) { return m.norm(); }
+__device__ Eigen::half eigen_mat3h_squared_norm(EigenMat3h m) { return m.squaredNorm(); }
+__device__ EigenVec3h eigen_mat3h_diagonal(EigenMat3h m) { return m.diagonal(); }
+
+// ── Matrix4h ─────────────────────────────────────────────────────
+
+__device__ EigenMat4h eigen_mat4h_add(EigenMat4h a, EigenMat4h b) { return a + b; }
+__device__ EigenMat4h eigen_mat4h_sub(EigenMat4h a, EigenMat4h b) { return a - b; }
+__device__ EigenMat4h eigen_mat4h_mul(EigenMat4h a, EigenMat4h b) { return a * b; }
+__device__ EigenVec4h eigen_mat4h_vec4h_mul(EigenMat4h m, EigenVec4h v) { return m * v; }
+__device__ Eigen::half eigen_mat4h_determinant(EigenMat4h m) { return m.determinant(); }
+__device__ EigenMat4h eigen_mat4h_inverse(EigenMat4h m) { return m.inverse(); }
+__device__ EigenMat4h eigen_mat4h_transpose(EigenMat4h m) { return m.transpose(); }
+__device__ Eigen::half eigen_mat4h_trace(EigenMat4h m) { return m.trace(); }
+__device__ EigenMat4h eigen_mat4h_cwise_product(EigenMat4h a, EigenMat4h b) { return a.cwiseProduct(b); }
+__device__ EigenMat4h eigen_mat4h_scale(EigenMat4h m, Eigen::half s) { return m * s; }
+__device__ Eigen::half eigen_mat4h_norm(EigenMat4h m) { return m.norm(); }
+__device__ Eigen::half eigen_mat4h_squared_norm(EigenMat4h m) { return m.squaredNorm(); }
+__device__ EigenVec4h eigen_mat4h_diagonal(EigenMat4h m) { return m.diagonal(); }
+
+// ── Vector2bf ────────────────────────────────────────────────────
+
+__device__ EigenVec2bf eigen_vec2bf_add(EigenVec2bf a, EigenVec2bf b) { return a + b; }
+__device__ EigenVec2bf eigen_vec2bf_sub(EigenVec2bf a, EigenVec2bf b) { return a - b; }
+__device__ Eigen::bfloat16 eigen_vec2bf_dot(EigenVec2bf a, EigenVec2bf b) { return a.dot(b); }
+__device__ Eigen::bfloat16 eigen_vec2bf_norm(EigenVec2bf v) { return v.norm(); }
+__device__ Eigen::bfloat16 eigen_vec2bf_squared_norm(EigenVec2bf v) { return v.squaredNorm(); }
+__device__ EigenVec2bf eigen_vec2bf_normalized(EigenVec2bf v) { return v.normalized(); }
+__device__ EigenVec2bf eigen_vec2bf_scale(EigenVec2bf v, Eigen::bfloat16 s) { return v * s; }
+__device__ EigenVec2bf eigen_vec2bf_cwise_product(EigenVec2bf a, EigenVec2bf b) { return a.cwiseProduct(b); }
+__device__ EigenVec2bf eigen_vec2bf_cwise_abs(EigenVec2bf v) { return v.cwiseAbs(); }
+__device__ EigenVec2bf eigen_vec2bf_cwise_min(EigenVec2bf a, EigenVec2bf b) { return a.cwiseMin(b); }
+__device__ EigenVec2bf eigen_vec2bf_cwise_max(EigenVec2bf a, EigenVec2bf b) { return a.cwiseMax(b); }
+__device__ Eigen::bfloat16 eigen_vec2bf_sum(EigenVec2bf v) { return v.sum(); }
+__device__ Eigen::bfloat16 eigen_vec2bf_min_coeff(EigenVec2bf v) { return v.minCoeff(); }
+__device__ Eigen::bfloat16 eigen_vec2bf_max_coeff(EigenVec2bf v) { return v.maxCoeff(); }
+__device__ EigenMat2bf eigen_vec2bf_outer(EigenVec2bf a, EigenVec2bf b) { return a * b.transpose(); }
+
+// ── Vector3bf ────────────────────────────────────────────────────
+
+__device__ EigenVec3bf eigen_vec3bf_add(EigenVec3bf a, EigenVec3bf b) { return a + b; }
+__device__ EigenVec3bf eigen_vec3bf_sub(EigenVec3bf a, EigenVec3bf b) { return a - b; }
+__device__ Eigen::bfloat16 eigen_vec3bf_dot(EigenVec3bf a, EigenVec3bf b) { return a.dot(b); }
+__device__ Eigen::bfloat16 eigen_vec3bf_norm(EigenVec3bf v) { return v.norm(); }
+__device__ Eigen::bfloat16 eigen_vec3bf_squared_norm(EigenVec3bf v) { return v.squaredNorm(); }
+__device__ EigenVec3bf eigen_vec3bf_normalized(EigenVec3bf v) { return v.normalized(); }
+__device__ EigenVec3bf eigen_vec3bf_scale(EigenVec3bf v, Eigen::bfloat16 s) { return v * s; }
+__device__ EigenVec3bf eigen_vec3bf_cross(EigenVec3bf a, EigenVec3bf b) { return a.cross(b); }
+__device__ EigenVec3bf eigen_vec3bf_cwise_product(EigenVec3bf a, EigenVec3bf b) { return a.cwiseProduct(b); }
+__device__ EigenVec3bf eigen_vec3bf_cwise_abs(EigenVec3bf v) { return v.cwiseAbs(); }
+__device__ EigenVec3bf eigen_vec3bf_cwise_min(EigenVec3bf a, EigenVec3bf b) { return a.cwiseMin(b); }
+__device__ EigenVec3bf eigen_vec3bf_cwise_max(EigenVec3bf a, EigenVec3bf b) { return a.cwiseMax(b); }
+__device__ Eigen::bfloat16 eigen_vec3bf_sum(EigenVec3bf v) { return v.sum(); }
+__device__ Eigen::bfloat16 eigen_vec3bf_min_coeff(EigenVec3bf v) { return v.minCoeff(); }
+__device__ Eigen::bfloat16 eigen_vec3bf_max_coeff(EigenVec3bf v) { return v.maxCoeff(); }
+__device__ EigenMat3bf eigen_vec3bf_outer(EigenVec3bf a, EigenVec3bf b) { return a * b.transpose(); }
+
+// ── Vector4bf ────────────────────────────────────────────────────
+
+__device__ EigenVec4bf eigen_vec4bf_add(EigenVec4bf a, EigenVec4bf b) { return a + b; }
+__device__ EigenVec4bf eigen_vec4bf_sub(EigenVec4bf a, EigenVec4bf b) { return a - b; }
+__device__ Eigen::bfloat16 eigen_vec4bf_dot(EigenVec4bf a, EigenVec4bf b) { return a.dot(b); }
+__device__ Eigen::bfloat16 eigen_vec4bf_norm(EigenVec4bf v) { return v.norm(); }
+__device__ Eigen::bfloat16 eigen_vec4bf_squared_norm(EigenVec4bf v) { return v.squaredNorm(); }
+__device__ EigenVec4bf eigen_vec4bf_normalized(EigenVec4bf v) { return v.normalized(); }
+__device__ EigenVec4bf eigen_vec4bf_scale(EigenVec4bf v, Eigen::bfloat16 s) { return v * s; }
+__device__ EigenVec4bf eigen_vec4bf_cwise_product(EigenVec4bf a, EigenVec4bf b) { return a.cwiseProduct(b); }
+__device__ EigenVec4bf eigen_vec4bf_cwise_abs(EigenVec4bf v) { return v.cwiseAbs(); }
+__device__ EigenVec4bf eigen_vec4bf_cwise_min(EigenVec4bf a, EigenVec4bf b) { return a.cwiseMin(b); }
+__device__ EigenVec4bf eigen_vec4bf_cwise_max(EigenVec4bf a, EigenVec4bf b) { return a.cwiseMax(b); }
+__device__ Eigen::bfloat16 eigen_vec4bf_sum(EigenVec4bf v) { return v.sum(); }
+__device__ Eigen::bfloat16 eigen_vec4bf_min_coeff(EigenVec4bf v) { return v.minCoeff(); }
+__device__ Eigen::bfloat16 eigen_vec4bf_max_coeff(EigenVec4bf v) { return v.maxCoeff(); }
+__device__ EigenMat4bf eigen_vec4bf_outer(EigenVec4bf a, EigenVec4bf b) { return a * b.transpose(); }
+
+// ── Matrix2bf ────────────────────────────────────────────────────
+
+__device__ EigenMat2bf eigen_mat2bf_add(EigenMat2bf a, EigenMat2bf b) { return a + b; }
+__device__ EigenMat2bf eigen_mat2bf_sub(EigenMat2bf a, EigenMat2bf b) { return a - b; }
+__device__ EigenMat2bf eigen_mat2bf_mul(EigenMat2bf a, EigenMat2bf b) { return a * b; }
+__device__ EigenVec2bf eigen_mat2bf_vec2bf_mul(EigenMat2bf m, EigenVec2bf v) { return m * v; }
+__device__ Eigen::bfloat16 eigen_mat2bf_determinant(EigenMat2bf m) { return m.determinant(); }
+__device__ EigenMat2bf eigen_mat2bf_inverse(EigenMat2bf m) { return m.inverse(); }
+__device__ EigenMat2bf eigen_mat2bf_transpose(EigenMat2bf m) { return m.transpose(); }
+__device__ Eigen::bfloat16 eigen_mat2bf_trace(EigenMat2bf m) { return m.trace(); }
+__device__ EigenMat2bf eigen_mat2bf_cwise_product(EigenMat2bf a, EigenMat2bf b) { return a.cwiseProduct(b); }
+__device__ EigenMat2bf eigen_mat2bf_scale(EigenMat2bf m, Eigen::bfloat16 s) { return m * s; }
+__device__ Eigen::bfloat16 eigen_mat2bf_norm(EigenMat2bf m) { return m.norm(); }
+__device__ Eigen::bfloat16 eigen_mat2bf_squared_norm(EigenMat2bf m) { return m.squaredNorm(); }
+__device__ EigenVec2bf eigen_mat2bf_diagonal(EigenMat2bf m) { return m.diagonal(); }
+
+// ── Matrix3bf ────────────────────────────────────────────────────
+
+__device__ EigenMat3bf eigen_mat3bf_add(EigenMat3bf a, EigenMat3bf b) { return a + b; }
+__device__ EigenMat3bf eigen_mat3bf_sub(EigenMat3bf a, EigenMat3bf b) { return a - b; }
+__device__ EigenMat3bf eigen_mat3bf_mul(EigenMat3bf a, EigenMat3bf b) { return a * b; }
+__device__ EigenVec3bf eigen_mat3bf_vec3bf_mul(EigenMat3bf m, EigenVec3bf v) { return m * v; }
+__device__ Eigen::bfloat16 eigen_mat3bf_determinant(EigenMat3bf m) { return m.determinant(); }
+__device__ EigenMat3bf eigen_mat3bf_inverse(EigenMat3bf m) { return m.inverse(); }
+__device__ EigenMat3bf eigen_mat3bf_transpose(EigenMat3bf m) { return m.transpose(); }
+__device__ Eigen::bfloat16 eigen_mat3bf_trace(EigenMat3bf m) { return m.trace(); }
+__device__ EigenMat3bf eigen_mat3bf_cwise_product(EigenMat3bf a, EigenMat3bf b) { return a.cwiseProduct(b); }
+__device__ EigenMat3bf eigen_mat3bf_scale(EigenMat3bf m, Eigen::bfloat16 s) { return m * s; }
+__device__ Eigen::bfloat16 eigen_mat3bf_norm(EigenMat3bf m) { return m.norm(); }
+__device__ Eigen::bfloat16 eigen_mat3bf_squared_norm(EigenMat3bf m) { return m.squaredNorm(); }
+__device__ EigenVec3bf eigen_mat3bf_diagonal(EigenMat3bf m) { return m.diagonal(); }
+
+// ── Matrix4bf ────────────────────────────────────────────────────
+
+__device__ EigenMat4bf eigen_mat4bf_add(EigenMat4bf a, EigenMat4bf b) { return a + b; }
+__device__ EigenMat4bf eigen_mat4bf_sub(EigenMat4bf a, EigenMat4bf b) { return a - b; }
+__device__ EigenMat4bf eigen_mat4bf_mul(EigenMat4bf a, EigenMat4bf b) { return a * b; }
+__device__ EigenVec4bf eigen_mat4bf_vec4bf_mul(EigenMat4bf m, EigenVec4bf v) { return m * v; }
+__device__ Eigen::bfloat16 eigen_mat4bf_determinant(EigenMat4bf m) { return m.determinant(); }
+__device__ EigenMat4bf eigen_mat4bf_inverse(EigenMat4bf m) { return m.inverse(); }
+__device__ EigenMat4bf eigen_mat4bf_transpose(EigenMat4bf m) { return m.transpose(); }
+__device__ Eigen::bfloat16 eigen_mat4bf_trace(EigenMat4bf m) { return m.trace(); }
+__device__ EigenMat4bf eigen_mat4bf_cwise_product(EigenMat4bf a, EigenMat4bf b) { return a.cwiseProduct(b); }
+__device__ EigenMat4bf eigen_mat4bf_scale(EigenMat4bf m, Eigen::bfloat16 s) { return m * s; }
+__device__ Eigen::bfloat16 eigen_mat4bf_norm(EigenMat4bf m) { return m.norm(); }
+__device__ Eigen::bfloat16 eigen_mat4bf_squared_norm(EigenMat4bf m) { return m.squaredNorm(); }
+__device__ EigenVec4bf eigen_mat4bf_diagonal(EigenMat4bf m) { return m.diagonal(); }

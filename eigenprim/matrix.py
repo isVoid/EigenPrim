@@ -41,9 +41,14 @@ _TYPE_MAP = {
     "Eigen::Matrix<double, 2, 1, 0, 2, 1>": "Eigen::Matrix<double, 2, 1>",
     "Eigen::Matrix<double, 3, 1, 0, 3, 1>": "Eigen::Matrix<double, 3, 1>",
     "Eigen::Matrix<double, 4, 1, 0, 4, 1>": "Eigen::Matrix<double, 4, 1>",
-    # Half-precision
+    # Half
+    "Eigen::Matrix<struct Eigen::half, 2, 1, 0, 2, 1>": "Eigen::Matrix<Eigen::half, 2, 1>",
     "Eigen::Matrix<struct Eigen::half, 3, 1, 0, 3, 1>": "Eigen::Matrix<Eigen::half, 3, 1>",
-    "Eigen::Matrix<struct Eigen::half, 3, 3, 0, 3, 3>": "Eigen::Matrix<Eigen::half, 3, 3>",
+    "Eigen::Matrix<struct Eigen::half, 4, 1, 0, 4, 1>": "Eigen::Matrix<Eigen::half, 4, 1>",
+    # Bfloat16
+    "Eigen::Matrix<struct Eigen::bfloat16, 2, 1, 0, 2, 1>": "Eigen::Matrix<Eigen::bfloat16, 2, 1>",
+    "Eigen::Matrix<struct Eigen::bfloat16, 3, 1, 0, 3, 1>": "Eigen::Matrix<Eigen::bfloat16, 3, 1>",
+    "Eigen::Matrix<struct Eigen::bfloat16, 4, 1, 0, 4, 1>": "Eigen::Matrix<Eigen::bfloat16, 4, 1>",
     # Matrices
     "Eigen::Matrix<float, 2, 2, 0, 2, 2>": "Eigen::Matrix<float, 2, 2>",
     "Eigen::Matrix<float, 3, 3, 0, 3, 3>": "Eigen::Matrix<float, 3, 3>",
@@ -51,6 +56,14 @@ _TYPE_MAP = {
     "Eigen::Matrix<double, 2, 2, 0, 2, 2>": "Eigen::Matrix<double, 2, 2>",
     "Eigen::Matrix<double, 3, 3, 0, 3, 3>": "Eigen::Matrix<double, 3, 3>",
     "Eigen::Matrix<double, 4, 4, 0, 4, 4>": "Eigen::Matrix<double, 4, 4>",
+    # Half matrices
+    "Eigen::Matrix<struct Eigen::half, 2, 2, 0, 2, 2>": "Eigen::Matrix<Eigen::half, 2, 2>",
+    "Eigen::Matrix<struct Eigen::half, 3, 3, 0, 3, 3>": "Eigen::Matrix<Eigen::half, 3, 3>",
+    "Eigen::Matrix<struct Eigen::half, 4, 4, 0, 4, 4>": "Eigen::Matrix<Eigen::half, 4, 4>",
+    # Bfloat16 matrices
+    "Eigen::Matrix<struct Eigen::bfloat16, 2, 2, 0, 2, 2>": "Eigen::Matrix<Eigen::bfloat16, 2, 2>",
+    "Eigen::Matrix<struct Eigen::bfloat16, 3, 3, 0, 3, 3>": "Eigen::Matrix<Eigen::bfloat16, 3, 3>",
+    "Eigen::Matrix<struct Eigen::bfloat16, 4, 4, 0, 4, 4>": "Eigen::Matrix<Eigen::bfloat16, 4, 4>",
 }
 
 _bindings = bind_eigen_header(
@@ -72,8 +85,12 @@ Vector2d = _bindings.types["Eigen::Matrix<double, 2, 1>"]
 Vector3d = _bindings.types["Eigen::Matrix<double, 3, 1>"]
 Vector4d = _bindings.types["Eigen::Matrix<double, 4, 1>"]
 
+Vector2h = _bindings.types["Eigen::Matrix<Eigen::half, 2, 1>"]
 Vector3h = _bindings.types["Eigen::Matrix<Eigen::half, 3, 1>"]
-Matrix3h = _bindings.types["Eigen::Matrix<Eigen::half, 3, 3>"]
+Vector4h = _bindings.types["Eigen::Matrix<Eigen::half, 4, 1>"]
+Vector2bf = _bindings.types["Eigen::Matrix<Eigen::bfloat16, 2, 1>"]
+Vector3bf = _bindings.types["Eigen::Matrix<Eigen::bfloat16, 3, 1>"]
+Vector4bf = _bindings.types["Eigen::Matrix<Eigen::bfloat16, 4, 1>"]
 
 Matrix2f = _bindings.types["Eigen::Matrix<float, 2, 2>"]
 Matrix3f = _bindings.types["Eigen::Matrix<float, 3, 3>"]
@@ -81,6 +98,13 @@ Matrix4f = _bindings.types["Eigen::Matrix<float, 4, 4>"]
 Matrix2d = _bindings.types["Eigen::Matrix<double, 2, 2>"]
 Matrix3d = _bindings.types["Eigen::Matrix<double, 3, 3>"]
 Matrix4d = _bindings.types["Eigen::Matrix<double, 4, 4>"]
+
+Matrix2h = _bindings.types["Eigen::Matrix<Eigen::half, 2, 2>"]
+Matrix3h = _bindings.types["Eigen::Matrix<Eigen::half, 3, 3>"]
+Matrix4h = _bindings.types["Eigen::Matrix<Eigen::half, 4, 4>"]
+Matrix2bf = _bindings.types["Eigen::Matrix<Eigen::bfloat16, 2, 2>"]
+Matrix3bf = _bindings.types["Eigen::Matrix<Eigen::bfloat16, 3, 3>"]
+Matrix4bf = _bindings.types["Eigen::Matrix<Eigen::bfloat16, 4, 4>"]
 
 # ── Function bindings ─────────────────────────────────────────────
 
@@ -90,7 +114,8 @@ _VEC_OPS = [
     "cwise_product", "cwise_abs", "cwise_min", "cwise_max",
     "sum", "min_coeff", "max_coeff", "outer",
 ]
-_VEC_TYPES = ["vec2f", "vec3f", "vec4f", "vec2d", "vec3d", "vec4d"]
+_VEC_TYPES = ["vec2f", "vec3f", "vec4f", "vec2d", "vec3d", "vec4d",
+              "vec2h", "vec3h", "vec4h", "vec2bf", "vec3bf", "vec4bf"]
 
 _MAT_OPS = [
     "add", "sub", "mul", "determinant", "inverse", "transpose", "trace",
@@ -99,6 +124,8 @@ _MAT_OPS = [
 _MAT_VEC_PAIRS = [
     ("mat2f", "vec2f"), ("mat3f", "vec3f"), ("mat4f", "vec4f"),
     ("mat2d", "vec2d"), ("mat3d", "vec3d"), ("mat4d", "vec4d"),
+    ("mat2h", "vec2h"), ("mat3h", "vec3h"), ("mat4h", "vec4h"),
+    ("mat2bf", "vec2bf"), ("mat3bf", "vec3bf"), ("mat4bf", "vec4bf"),
 ]
 
 FUNCTION_NAMES = []
@@ -114,13 +141,6 @@ for mt, vt in _MAT_VEC_PAIRS:
         FUNCTION_NAMES.append(f"eigen_{mt}_{op}")
     FUNCTION_NAMES.append(f"eigen_{mt}_{vt}_mul")
 
-# Half-precision (subset of ops)
-for op in ["add", "sub", "dot", "norm", "normalized", "cross"]:
-    FUNCTION_NAMES.append(f"eigen_vec3h_{op}")
-for op in ["mul", "determinant", "inverse", "transpose"]:
-    FUNCTION_NAMES.append(f"eigen_mat3h_{op}")
-FUNCTION_NAMES.append("eigen_mat3h_vec3h_mul")
-
 # Populate module namespace with all bound functions.
 _ns = globals()
 for _name in FUNCTION_NAMES:
@@ -128,8 +148,9 @@ for _name in FUNCTION_NAMES:
 
 TYPE_NAMES = [
     "Vector2f", "Vector3f", "Vector4f", "Vector2d", "Vector3d", "Vector4d",
+    "Vector2h", "Vector3h", "Vector4h", "Vector2bf", "Vector3bf", "Vector4bf",
     "Matrix2f", "Matrix3f", "Matrix4f", "Matrix2d", "Matrix3d", "Matrix4d",
-    "Vector3h", "Matrix3h",
+    "Matrix2h", "Matrix3h", "Matrix4h", "Matrix2bf", "Matrix3bf", "Matrix4bf",
 ]
 
 # ── Operator overloads ────────────────────────────────────────────
