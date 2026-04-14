@@ -202,10 +202,11 @@ def kernel(out):
 pixi run python examples/01_vector_basics.py          # Vector3f dot, norm, add
 pixi run python examples/02_all_types.py              # All 12 types with operators
 pixi run python examples/03_templates.py              # Generic templated functions
-pixi run python examples/04_point_cloud_transform.py  # Batch transform + linear solve
+pixi run python examples/04_point_cloud_transform.py  # Batch rigid-body transform
+pixi run python examples/05_batch_linear_solve.py     # Batch Ax=b solve via inverse
 ```
 
-`04_point_cloud_transform.py` demonstrates a realistic pattern: rotating a 1024-point cloud with a rigid-body transform kernel (`R @ p + t`), then solving per-element linear systems via `inverse(A) @ b`. Results are verified against numpy.
+The last two demonstrate realistic parallel patterns on 1024 elements, verified against numpy.
 
 ## Custom Bindings
 
