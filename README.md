@@ -216,6 +216,8 @@ pixi run python examples/02_all_types.py              # All 12 types with operat
 pixi run python examples/03_point_cloud_transform.py  # Batch rigid-body transform
 pixi run python examples/04_batch_linear_solve.py     # Batch Ax=b solve via inverse
 pixi run python examples/05_templates.py              # Generic templated functions (experimental)
+pixi run python examples/10_half_precision.py         # fp16: Vector3h, Matrix3h
+pixi run python examples/11_bfloat16.py               # bf16: Vector3bf, Matrix3bf
 pixi run python examples/06_triangle_normals.py       # Surface normals: cross, normalized
 pixi run python examples/07_covariance_matrix.py      # Outer products: outer, diagonal, trace
 pixi run python examples/08_aabb_reduction.py         # Bounding box: cwise_min, cwise_max
