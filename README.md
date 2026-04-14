@@ -5,7 +5,7 @@ Numba CUDA bindings for Eigen's fixed-size vector and matrix types, powered by [
 ## Quick Start
 
 ```python
-from eigenprim import Vector3f, Matrix3f, eigen_vec3f_dot, links
+from eigenprim import Vector3f, Matrix3f, dot, norm, inverse, links
 from numba import cuda
 import numpy as np
 
@@ -13,14 +13,18 @@ import numpy as np
 def kernel(out):
     a = Vector3f(1.0, 2.0, 3.0)
     b = Vector3f(4.0, 5.0, 6.0)
-    out[0] = a + b                 # operator syntax
-    out[1] = eigen_vec3f_dot(a, b) # named function
+    out[0] = dot(a, b)     # type-dispatched
+    out[1] = norm(a + b)   # operators + generic functions
 
 out = np.zeros(2, dtype=np.float32)
 kernel[1, 1](out)
 ```
 
-Import types and functions, pass `links()` to `@cuda.jit`, and use them directly in the kernel. Standard Python operators (`+`, `-`, `*`, `@`) work out of the box.
+Import types and functions, pass `links()` to `@cuda.jit`, and use them directly in the kernel. Three ways to call operations:
+
+- **Operators**: `a + b`, `M @ v`, `v * 2.0`
+- **Generic functions**: `eigenprim.dot(a, b)`, `eigenprim.inverse(M)` — type-dispatched
+- **Explicit functions**: `eigen_vec3f_dot(a, b)` — when you need full control
 
 ## Available Types
 
@@ -153,7 +157,28 @@ def kernel(out):
     R = M @ M            # eigen_mat3f_mul
 ```
 
-Operations without an operator (dot, norm, cross, determinant, inverse, transpose, trace) use named functions.
+### Generic Functions
+
+All operations are available as type-dispatched generic functions, accessible as `eigenprim.{op}` or via direct import. They dispatch to the correct `eigen_{type}_{op}` at JIT compile time based on argument types.
+
+```python
+from eigenprim import dot, norm, inverse, determinant, outer, diagonal
+
+@cuda.jit(link=links())
+def kernel(out):
+    a = Vector3f(1.0, 2.0, 3.0)
+    b = Vector3f(4.0, 5.0, 6.0)
+    out[0] = dot(a, b)              # -> eigen_vec3f_dot
+    out[1] = norm(a)                # -> eigen_vec3f_norm
+
+    M = Matrix3f(...)
+    out[2] = determinant(M)         # -> eigen_mat3f_determinant
+    inv_M = inverse(M)              # -> eigen_mat3f_inverse
+    d = diagonal(M)                 # -> eigen_mat3f_diagonal (returns Vector3f)
+    P = outer(a, b)                 # -> eigen_vec3f_outer (returns Matrix3f)
+```
+
+Full list: `add`, `sub`, `dot`, `cross`, `norm`, `squared_norm`, `normalized`, `scale`, `cwise_product`, `cwise_abs`, `cwise_min`, `cwise_max`, `sum`, `min_coeff`, `max_coeff`, `outer`, `mul`, `determinant`, `inverse`, `transpose`, `trace`, `diagonal`, `vec_mul`.
 
 ### Template Functions
 
