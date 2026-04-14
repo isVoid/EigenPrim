@@ -204,9 +204,13 @@ pixi run python examples/02_all_types.py              # All 12 types with operat
 pixi run python examples/03_point_cloud_transform.py  # Batch rigid-body transform
 pixi run python examples/04_batch_linear_solve.py     # Batch Ax=b solve via inverse
 pixi run python examples/05_templates.py              # Generic templated functions (experimental)
+pixi run python examples/06_triangle_normals.py       # Surface normals: cross, normalized
+pixi run python examples/07_covariance_matrix.py      # Outer products: outer, diagonal, trace
+pixi run python examples/08_aabb_reduction.py         # Bounding box: cwise_min, cwise_max
+pixi run python examples/09_double_precision.py       # Double-precision N-body: Vector3d
 ```
 
-The last two demonstrate realistic parallel patterns on 1024 elements, verified against numpy.
+Examples 03-09 are realistic parallel patterns verified against numpy. See [examples/README.md](examples/README.md) for details.
 
 ## Custom Bindings
 
