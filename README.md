@@ -5,7 +5,7 @@ Numba CUDA bindings for Eigen's fixed-size vector and matrix types, powered by [
 ## Quick Start
 
 ```python
-from eigenprim import Vector3f, eigen_vec3f_dot, links
+from eigenprim import Vector3f, Matrix3f, eigen_vec3f_dot, links
 from numba import cuda
 import numpy as np
 
@@ -13,14 +13,14 @@ import numpy as np
 def kernel(out):
     a = Vector3f(1.0, 2.0, 3.0)
     b = Vector3f(4.0, 5.0, 6.0)
-    out[0] = eigen_vec3f_dot(a, b)
+    out[0] = a + b                 # operator syntax
+    out[1] = eigen_vec3f_dot(a, b) # named function
 
-out = np.zeros(1, dtype=np.float32)
+out = np.zeros(2, dtype=np.float32)
 kernel[1, 1](out)
-# out[0] == 32.0
 ```
 
-Import types and functions, pass `links()` to `@cuda.jit`, and use them directly in the kernel.
+Import types and functions, pass `links()` to `@cuda.jit`, and use them directly in the kernel. Standard Python operators (`+`, `-`, `*`, `@`) work out of the box.
 
 ## Available Types
 
@@ -113,6 +113,34 @@ Available for all 6 matrix types (`mat2f` through `mat4d`):
 | `trace(m)` | `eigen_mat3f_trace(m)` | scalar |
 
 Matrix-vector multiply uses the pattern `eigen_{mattype}_{vectype}_mul` — for example, `eigen_mat4f_vec4f_mul(m, v)`.
+
+### Operator Syntax
+
+Standard Python operators are overloaded for all Eigen types, so you can write natural expressions in kernels:
+
+| Syntax | Vectors | Matrices |
+|---|---|---|
+| `a + b` | vector add | matrix add |
+| `a - b` | vector sub | matrix sub |
+| `v * 2.0` or `2.0 * v` | scalar multiply | — |
+| `M @ N` | — | matrix multiply |
+| `M @ v` | — | matrix-vector multiply |
+
+```python
+@cuda.jit(link=links())
+def kernel(out):
+    a = Vector3f(1.0, 2.0, 3.0)
+    b = Vector3f(4.0, 5.0, 6.0)
+    c = a + b           # eigen_vec3f_add
+    d = a * 2.0         # eigen_vec3f_scale
+    e = 3.0 * a         # eigen_vec3f_scale (reversed)
+
+    M = Matrix3f(...)
+    v = M @ a            # eigen_mat3f_vec3f_mul
+    R = M @ M            # eigen_mat3f_mul
+```
+
+Operations without an operator (dot, norm, cross, determinant, inverse, transpose, trace) use named functions.
 
 ### Thin Wrapper API (Vec3f)
 
