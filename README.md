@@ -20,8 +20,9 @@ out = np.zeros(2, dtype=np.float32)
 kernel[1, 1](out)
 ```
 
-Import types and functions, pass `links()` to `@cuda.jit`, and use them directly in the kernel. Three ways to call operations:
+Import types and functions, pass `links()` to `@cuda.jit`, and use them directly in the kernel. Four ways to call operations:
 
+- **Methods**: `a.dot(b)`, `M.inverse()`, `v.norm()` — Eigen-style chaining
 - **Operators**: `a + b`, `M @ v`, `v * 2.0`
 - **Generic functions**: `eigenprim.dot(a, b)`, `eigenprim.inverse(M)` — type-dispatched
 - **Explicit functions**: `eigen_vec3f_dot(a, b)` — when you need full control
@@ -143,6 +144,56 @@ Available for all 12 matrix types (float, double, half, bfloat16 x 2x2/3x3/4x4):
 
 Matrix-vector multiply uses the pattern `eigen_{mattype}_{vectype}_mul` — for example, `eigen_mat4f_vec4f_mul(m, v)`.
 
+### Method Syntax
+
+All operations are also available as methods directly on instances, so you can use Eigen-style chaining inside kernels:
+
+| Method | Applies to | Returns |
+|---|---|---|
+| `v.dot(other)` | vectors | scalar |
+| `v.cross(other)` | 3D vectors only | vector |
+| `v.norm()` | vectors | scalar |
+| `v.squared_norm()` | vectors | scalar |
+| `v.normalized()` | vectors | unit vector |
+| `v.scale(s)` | vectors, matrices | same type |
+| `v.sum()` | vectors | scalar |
+| `v.min_coeff()` | vectors | scalar |
+| `v.max_coeff()` | vectors | scalar |
+| `v.cwise_product(other)` | vectors, matrices | same type |
+| `v.cwise_abs()` | vectors | vector |
+| `v.cwise_min(other)` | vectors | vector |
+| `v.cwise_max(other)` | vectors | vector |
+| `v.outer(other)` | vectors | matrix |
+| `M.determinant()` | matrices | scalar |
+| `M.inverse()` | matrices | matrix |
+| `M.transpose()` | matrices | matrix |
+| `M.trace()` | matrices | scalar |
+| `M.norm()` | matrices | scalar (Frobenius) |
+| `M.squared_norm()` | matrices | scalar |
+| `M.diagonal()` | matrices | vector |
+| `M.vec_mul(v)` | matrices | vector |
+
+```python
+@cuda.jit(link=links())
+def kernel(out):
+    a = Vector3f(1.0, 2.0, 3.0)
+    b = Vector3f(4.0, 5.0, 6.0)
+
+    out[0] = a.dot(b)                    # 32.0
+    out[1] = a.norm()                    # 3.7417
+    c = a.cross(b)
+    u = c.normalized()                   # unit vector, chain methods
+
+    M = Matrix3f(2.0, 0.0, 0.0,
+                 0.0, 2.0, 0.0,
+                 0.0, 0.0, 2.0)
+    out[2] = M.determinant()             # 8.0
+    out[3] = M.inverse().trace()         # 1.5
+    out[4] = M.vec_mul(a).dot(a)         # 28.0
+```
+
+Methods and generic dispatch functions (`dot(a, b)`, `norm(v)`, ...) are exact aliases — they call the same underlying CUDA function.
+
 ### Operator Syntax
 
 Standard Python operators are overloaded for all 24 Eigen types (including half and bfloat16), so you can write natural expressions in kernels:
@@ -220,6 +271,7 @@ pixi run python examples/06_triangle_normals.py       # Surface normals: cross, 
 pixi run python examples/07_covariance_matrix.py      # Outer products: outer, diagonal, trace
 pixi run python examples/08_aabb_reduction.py         # Bounding box: cwise_min, cwise_max
 pixi run python examples/09_double_precision.py       # Double-precision N-body: Vector3d
+pixi run python examples/10_methods.py               # Method invocation: a.dot(b), M.inverse()
 ```
 
 Examples 03-09 are realistic parallel patterns verified against numpy. See [examples/README.md](examples/README.md) for details.
