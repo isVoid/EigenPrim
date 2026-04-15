@@ -1,15 +1,29 @@
 """Eigenprim: Eigen device primitives for CUDA Python.
 
-Import types and functions directly::
+Four ways to call operations inside ``@cuda.jit`` kernels::
 
-    from eigenprim import Vector3f, Matrix4f, eigen_vec3f_dot, links
+    from eigenprim import Vector3f, Matrix3f, dot, norm, links
     from numba import cuda
 
     @cuda.jit(link=links())
     def kernel(out):
         a = Vector3f(1.0, 2.0, 3.0)
         b = Vector3f(4.0, 5.0, 6.0)
-        out[0] = eigen_vec3f_dot(a, b)
+
+        # 1. Method syntax (Eigen-style chaining)
+        out[0] = a.dot(b)
+        out[1] = a.normalized().norm()
+
+        # 2. Generic dispatch functions
+        out[2] = dot(a, b)
+        out[3] = norm(a)
+
+        # 3. Operators
+        out[4] = (a + b).norm()
+
+        # 4. Explicit per-type functions
+        from eigenprim import eigen_vec3f_dot
+        out[5] = eigen_vec3f_dot(a, b)
 
 For custom bindings, use the low-level API::
 
