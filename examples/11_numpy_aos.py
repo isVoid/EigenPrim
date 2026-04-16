@@ -1,34 +1,49 @@
 """
-eigenprim: Array-of-Structures (AoS) patterns with 2D/3D numpy arrays.
+eigenprim: numpy packed-struct arrays and element-wise kernels.
 
-All previous examples use Structure-of-Arrays (SoA): a (N, 3) numpy array
-is split into three separate (N,) arrays on the host before the kernel call,
-then reassembled component-by-component inside the kernel::
+This example shows two patterns for integrating eigenprim with numpy at
+a higher level than raw Structure-of-Arrays (SoA).
 
-    # SoA pattern (existing examples)
-    px, py, pz = pts[:, 0].copy(), pts[:, 1].copy(), pts[:, 2].copy()
+─────────────────────────────────────────────────────────────────────────────
+Pattern A — Structured dtype + unboxing wrapper
+─────────────────────────────────────────────────────────────────────────────
+numpy's structured dtype creates a true array-of-structs in memory, one
+packed record per element:
 
-    @cuda.jit(link=links())
-    def kernel(px, py, pz, ...):
-        p = Vector3f(px[i], py[i], pz[i])
+    vec3f_dtype = np.dtype([('x', 'f4'), ('y', 'f4'), ('z', 'f4')])
 
-This example shows the Array-of-Structures (AoS) pattern: the kernel
-accepts the 2D numpy array directly and indexes into it with ``pts[i, j]``.
-No host-side decomposition is needed. ``eigenprim.numpy_utils`` provides
-helpers for converting between AoS and SoA layouts when required.
+    pts = np.empty(N, dtype=vec3f_dtype)
+    pts['x'] = rng.standard_normal(N).astype(np.float32)
+    ...
 
-    # AoS pattern (this example)
-    pts = rng.standard_normal((N, 3)).astype(np.float32)  # shape (N, 3)
+A Python **wrapper** is the public API.  It accepts the struct array,
+unboxes the field arrays (``unbox_vec3f``), calls the CUDA kernel with
+contiguous per-component arrays, and re-packs the output into a struct
+array (``box_vec3f``).  The caller never sees SoA:
 
-    @cuda.jit(link=links())
-    def kernel(pts, ...):
-        p = Vector3f(pts[i, 0], pts[i, 1], pts[i, 2])
+    result = normalize(pts)          # in:  vec3f struct array
+                                     # out: vec3f struct array
 
-Three kernels are demonstrated:
+─────────────────────────────────────────────────────────────────────────────
+Pattern B — Element-wise device function (ufunc-style)
+─────────────────────────────────────────────────────────────────────────────
+For complex per-element logic, separate the computation from the iteration:
 
-  Kernel A — Batch dot products      (N, 3) x (N, 3)   → (N,)    [scalar output]
-  Kernel B — Batch normalize         (N, 3)             → (N, 3)  [AoS input + output]
-  Kernel C — Batch mat-vec multiply  (N, 3, 3) x (N, 3) → (N, 3)  [3-D AoS input]
+    @cuda.jit(device=True)                 # element kernel — no grid index,
+    def normalize_element(px, py, pz):     # no bounds check, pure logic
+        p = Vector3f(px, py, pz)
+        u = normalized(p)
+        ...
+        return ux, uy, uz
+
+    @cuda.jit(link=links())                # iteration scaffolding only
+    def _normalize_batch(px, py, pz, ox, oy, oz):
+        i = cuda.grid(1)
+        if i >= px.shape[0]: return
+        ox[i], oy[i], oz[i] = normalize_element(px[i], py[i], pz[i])
+
+The element function is the unit of user logic; the batch kernel is
+boilerplate.  The Python wrapper composes them with structured I/O.
 
 Run:  pixi run python examples/11_numpy_aos.py
 """
@@ -37,140 +52,259 @@ import numpy as np
 from numba import cuda
 
 from eigenprim import Vector3f, Matrix3f, dot, normalized, links
-from eigenprim.numpy_utils import vec_to_soa, soa_to_vec, mat_to_soa, soa_to_mat
+from eigenprim.numpy_utils import (
+    vec3f_dtype, mat3f_dtype,
+    unbox_vec3f, box_vec3f,
+    unbox_mat3f,
+)
 
 
-# ── Kernel A: Batch dot products ──────────────────────────────────────────────
-# Input : a, b — shape (N, 3) float32
-# Output: out  — shape (N,)  float32  (scalar per pair)
-
-@cuda.jit(link=links())
-def dot_kernel(a, b, out):
-    i = cuda.grid(1)
-    if i >= a.shape[0]:
-        return
-    va = Vector3f(a[i, 0], a[i, 1], a[i, 2])
-    vb = Vector3f(b[i, 0], b[i, 1], b[i, 2])
-    out[i] = dot(va, vb)
-
-
-# ── Kernel B: Batch normalize ─────────────────────────────────────────────────
-# Input : pts — shape (N, 3) float32
-# Output: out — shape (N, 3) float32  (unit vectors)
+# ─────────────────────────────────────────────────────────────────────────────
+# Pattern A — Structured dtype + unboxing wrapper
 #
-# Writing a vector result back to a 2-D output array uses the established
-# dot-with-basis-vector pattern (see also examples/06_triangle_normals.py).
+# Kernel: normalize a batch of Vec3f.  Receives and returns contiguous SoA
+# arrays — the structured-dtype interface is handled entirely by the wrapper.
+# ─────────────────────────────────────────────────────────────────────────────
 
 @cuda.jit(link=links())
-def normalize_kernel(pts, out):
+def _normalize_kernel(px, py, pz, ox, oy, oz):
     i = cuda.grid(1)
-    if i >= pts.shape[0]:
+    if i >= px.shape[0]:
         return
-    p = Vector3f(pts[i, 0], pts[i, 1], pts[i, 2])
+    p = Vector3f(px[i], py[i], pz[i])
     u = normalized(p)
-    # Extract components via dot with standard basis vectors
     e0 = Vector3f(1.0, 0.0, 0.0)
     e1 = Vector3f(0.0, 1.0, 0.0)
     e2 = Vector3f(0.0, 0.0, 1.0)
-    out[i, 0] = dot(u, e0)
-    out[i, 1] = dot(u, e1)
-    out[i, 2] = dot(u, e2)
+    ox[i] = dot(u, e0)
+    oy[i] = dot(u, e1)
+    oz[i] = dot(u, e2)
 
 
-# ── Kernel C: Batch matrix-vector multiply ────────────────────────────────────
-# Input : mats — shape (N, 3, 3) float32  (one matrix per element)
-#         vecs — shape (N, 3)    float32
-# Output: out  — shape (N, 3)   float32
+def normalize(pts):
+    """Normalize an array of Vec3f structs.
+
+    Parameters
+    ----------
+    pts : np.ndarray with dtype vec3f_dtype, shape (N,)
+        Input vectors as a packed struct array.
+
+    Returns
+    -------
+    np.ndarray with dtype vec3f_dtype, shape (N,)
+        Unit vectors, packed into a struct array.
+    """
+    assert pts.dtype == vec3f_dtype, f"expected vec3f_dtype, got {pts.dtype}"
+    N = len(pts)
+    TPB = 256
+
+    # Unbox: extract contiguous per-component arrays from the struct array.
+    # (Struct field views are strided; np.ascontiguousarray packs each field.)
+    px, py, pz = unbox_vec3f(pts)
+
+    ox = np.empty(N, dtype=np.float32)
+    oy = np.empty(N, dtype=np.float32)
+    oz = np.empty(N, dtype=np.float32)
+
+    _normalize_kernel[(N + TPB - 1) // TPB, TPB](px, py, pz, ox, oy, oz)
+
+    # Box: pack the output components back into a struct array.
+    return box_vec3f(ox, oy, oz)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Pattern B — Element-wise device function (ufunc-style)
 #
-# numpy stores (N, 3, 3) in row-major order: mats[i, row, col].
-# Eigen's Matrix3f constructor is column-major:
-#   Matrix3f(col0row0, col0row1, col0row2,
-#            col1row0, col1row1, col1row2,
-#            col2row0, col2row1, col2row2)
-# So to read column 0 we hold col=0 and vary row: mats[i, 0, 0], mats[i, 1, 0], mats[i, 2, 0].
+# The element function holds all per-element logic; the batch kernel is
+# pure iteration scaffolding.  The Python wrapper provides structured I/O.
+# ─────────────────────────────────────────────────────────────────────────────
+
+@cuda.jit(device=True)
+def _dot_element(ax, ay, az, bx, by, bz):
+    """Dot product of two Vec3f, expressed as scalar components.
+
+    This is the element-level logic — no thread index, no bounds check.
+    It is called once per element by the batch kernel below.
+    """
+    a = Vector3f(ax, ay, az)
+    b = Vector3f(bx, by, bz)
+    return dot(a, b)
+
 
 @cuda.jit(link=links())
-def matvec_kernel(mats, vecs, out):
+def _dot_batch(ax, ay, az, bx, by, bz, out):
+    """Iteration scaffolding: call _dot_element for each thread."""
     i = cuda.grid(1)
-    if i >= vecs.shape[0]:
+    if i >= ax.shape[0]:
         return
-    M = Matrix3f(
-        mats[i, 0, 0], mats[i, 1, 0], mats[i, 2, 0],   # column 0
-        mats[i, 0, 1], mats[i, 1, 1], mats[i, 2, 1],   # column 1
-        mats[i, 0, 2], mats[i, 1, 2], mats[i, 2, 2],   # column 2
+    out[i] = _dot_element(ax[i], ay[i], az[i], bx[i], by[i], bz[i])
+
+
+def pairwise_dot(a, b):
+    """Compute dot(a[i], b[i]) for each element.
+
+    Parameters
+    ----------
+    a, b : np.ndarray with dtype vec3f_dtype, shape (N,)
+
+    Returns
+    -------
+    np.ndarray, shape (N,), dtype float32
+    """
+    assert a.dtype == vec3f_dtype and b.dtype == vec3f_dtype
+    N = len(a)
+    TPB = 256
+
+    ax, ay, az = unbox_vec3f(a)
+    bx, by, bz = unbox_vec3f(b)
+    out = np.empty(N, dtype=np.float32)
+
+    _dot_batch[(N + TPB - 1) // TPB, TPB](ax, ay, az, bx, by, bz, out)
+    return out
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Pattern B extended — element-wise mat-vec multiply
+# ─────────────────────────────────────────────────────────────────────────────
+
+@cuda.jit(device=True)
+def _matvec_element(m00, m10, m20, m01, m11, m21, m02, m12, m22,
+                    vx, vy, vz):
+    """Matrix-vector multiply for one element (column-major Eigen layout)."""
+    M = Matrix3f(m00, m10, m20, m01, m11, m21, m02, m12, m22)
+    v = Vector3f(vx, vy, vz)
+    r = M @ v
+    e0 = Vector3f(1.0, 0.0, 0.0)
+    e1 = Vector3f(0.0, 1.0, 0.0)
+    e2 = Vector3f(0.0, 0.0, 1.0)
+    return dot(r, e0), dot(r, e1), dot(r, e2)
+
+
+@cuda.jit(link=links())
+def _matvec_batch(m00, m10, m20, m01, m11, m21, m02, m12, m22,
+                  vx, vy, vz, ox, oy, oz):
+    """Iteration scaffolding for mat-vec multiply."""
+    i = cuda.grid(1)
+    if i >= vx.shape[0]:
+        return
+    ox[i], oy[i], oz[i] = _matvec_element(
+        m00[i], m10[i], m20[i], m01[i], m11[i], m21[i], m02[i], m12[i], m22[i],
+        vx[i], vy[i], vz[i],
     )
-    v      = Vector3f(vecs[i, 0], vecs[i, 1], vecs[i, 2])
-    result = M @ v
-    e0     = Vector3f(1.0, 0.0, 0.0)
-    e1     = Vector3f(0.0, 1.0, 0.0)
-    e2     = Vector3f(0.0, 0.0, 1.0)
-    out[i, 0] = dot(result, e0)
-    out[i, 1] = dot(result, e1)
-    out[i, 2] = dot(result, e2)
 
 
-# ── Host setup ────────────────────────────────────────────────────────────────
+def matvec(mats, vecs):
+    """Multiply each matrix by the corresponding vector.
+
+    Parameters
+    ----------
+    mats : np.ndarray with dtype mat3f_dtype, shape (N,)
+        Packed Mat3f struct array (field names: m_ij, row i col j).
+    vecs : np.ndarray with dtype vec3f_dtype, shape (N,)
+        Packed Vec3f struct array.
+
+    Returns
+    -------
+    np.ndarray with dtype vec3f_dtype, shape (N,)
+    """
+    assert mats.dtype == mat3f_dtype and vecs.dtype == vec3f_dtype
+    N = len(vecs)
+    TPB = 256
+
+    # Unbox both struct arrays
+    m00, m10, m20, m01, m11, m21, m02, m12, m22 = unbox_mat3f(mats)
+    vx, vy, vz = unbox_vec3f(vecs)
+
+    ox = np.empty(N, dtype=np.float32)
+    oy = np.empty(N, dtype=np.float32)
+    oz = np.empty(N, dtype=np.float32)
+
+    _matvec_batch[(N + TPB - 1) // TPB, TPB](
+        m00, m10, m20, m01, m11, m21, m02, m12, m22,
+        vx, vy, vz, ox, oy, oz,
+    )
+    return box_vec3f(ox, oy, oz)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Host setup — create packed struct arrays
+# ─────────────────────────────────────────────────────────────────────────────
 
 N   = 1024
 rng = np.random.default_rng(42)
-TPB = 256
-blocks = (N + TPB - 1) // TPB
 
-# Kernel A — AoS inputs passed directly
-a_pts   = rng.standard_normal((N, 3)).astype(np.float32)
-b_pts   = rng.standard_normal((N, 3)).astype(np.float32)
-dot_out = np.zeros(N, dtype=np.float32)
-dot_kernel[blocks, TPB](a_pts, b_pts, dot_out)
+# Vec3f struct arrays
+def random_vec3f(n):
+    pts = np.empty(n, dtype=vec3f_dtype)
+    pts["x"] = rng.standard_normal(n).astype(np.float32)
+    pts["y"] = rng.standard_normal(n).astype(np.float32)
+    pts["z"] = rng.standard_normal(n).astype(np.float32)
+    return pts
 
-# Kernel B — AoS input, AoS output
-raw_pts  = rng.standard_normal((N, 3)).astype(np.float32)
-norm_out = np.zeros((N, 3), dtype=np.float32)
-normalize_kernel[blocks, TPB](raw_pts, norm_out)
+# Mat3f struct arrays (row-major field names)
+def random_mat3f(n):
+    mats = np.empty(n, dtype=mat3f_dtype)
+    for f in mat3f_dtype.names:
+        mats[f] = rng.standard_normal(n).astype(np.float32)
+    return mats
 
-# Kernel C — 3-D AoS input
-raw_mats = rng.standard_normal((N, 3, 3)).astype(np.float32)
-mv_vecs  = rng.standard_normal((N, 3)).astype(np.float32)
-mv_out   = np.zeros((N, 3), dtype=np.float32)
-matvec_kernel[blocks, TPB](raw_mats, mv_vecs, mv_out)
+a_pts  = random_vec3f(N)
+b_pts  = random_vec3f(N)
+raw_pts = random_vec3f(N)
+raw_mats = random_mat3f(N)
 
-# ── numpy_utils round-trip demo ───────────────────────────────────────────────
-# vec_to_soa / soa_to_vec convert between AoS and SoA layouts on the host.
-# Useful when you have AoS data but need to call an existing SoA kernel.
+# Run
+norm_result = normalize(raw_pts)         # Pattern A: struct → struct
+dot_result  = pairwise_dot(a_pts, b_pts) # Pattern B: struct → scalar
+mv_result   = matvec(raw_mats, a_pts)    # Pattern B ext: struct × struct → struct
 
-px, py, pz = vec_to_soa(raw_pts)              # (N,3) → three (N,) arrays
-pts_roundtrip = soa_to_vec(px, py, pz)        # three (N,) arrays → (N,3)
-assert np.allclose(raw_pts, pts_roundtrip), "vec_to_soa / soa_to_vec round-trip failed"
 
-# mat_to_soa / soa_to_mat for 3-D arrays (column-major order)
-cols = mat_to_soa(raw_mats)                   # (N,3,3) → nine (N,) arrays
-mats_roundtrip = soa_to_mat(3, 3, *cols)      # nine (N,) arrays → (N,3,3)
-assert np.allclose(raw_mats, mats_roundtrip), "mat_to_soa / soa_to_mat round-trip failed"
+# ─────────────────────────────────────────────────────────────────────────────
+# Verify against numpy references
+# ─────────────────────────────────────────────────────────────────────────────
 
-# ── Verify against numpy references ──────────────────────────────────────────
+def vec3f_to_array(pts):
+    """Convert struct array to (N, 3) for numpy reference."""
+    return np.stack([pts["x"], pts["y"], pts["z"]], axis=1).astype(np.float64)
 
-# Kernel A
-expected_dots = np.einsum("ni,ni->n", a_pts, b_pts)
-ok_a = np.allclose(dot_out, expected_dots, rtol=1e-5)
+def mat3f_to_array(mats):
+    """Convert struct array to (N, 3, 3) for numpy reference."""
+    out = np.empty((len(mats), 3, 3), dtype=np.float64)
+    for i, f in enumerate(["m00","m01","m02","m10","m11","m12","m20","m21","m22"]):
+        out[:, i // 3, i % 3] = mats[f]
+    return out
 
-# Kernel B
-inv_norms     = 1.0 / np.linalg.norm(raw_pts, axis=1, keepdims=True)
-expected_norm = raw_pts * inv_norms
-ok_b = np.allclose(norm_out, expected_norm, atol=1e-5)
+raw_np = vec3f_to_array(raw_pts)
+a_np   = vec3f_to_array(a_pts)
+b_np   = vec3f_to_array(b_pts)
+mats_np = mat3f_to_array(raw_mats)
 
-# Kernel C
-expected_mv = np.einsum("nij,nj->ni", raw_mats, mv_vecs)
-ok_c = np.allclose(mv_out, expected_mv, rtol=1e-4)
+# normalize
+norms64 = np.linalg.norm(raw_np, axis=1, keepdims=True)
+expected_norm = (raw_np / norms64).astype(np.float32)
+got_norm = np.stack([norm_result["x"], norm_result["y"], norm_result["z"]], axis=1)
+ok_a = np.allclose(got_norm, expected_norm, atol=1e-5)
 
-print(f"Kernel A — Batch dot products ({N} pairs)")
-print(f"  {'PASS' if ok_a else 'FAIL'}  max err: {np.max(np.abs(dot_out - expected_dots)):.2e}")
+# pairwise dot
+expected_dot = np.einsum("ni,ni->n", a_np, b_np).astype(np.float32)
+ok_b = np.allclose(dot_result, expected_dot, rtol=1e-5)
 
-print(f"Kernel B — Batch normalize ({N} vectors)")
-print(f"  {'PASS' if ok_b else 'FAIL'}  max err: {np.max(np.abs(norm_out - expected_norm)):.2e}")
+# matvec
+expected_mv = np.einsum("nij,nj->ni", mats_np, a_np).astype(np.float32)
+got_mv = np.stack([mv_result["x"], mv_result["y"], mv_result["z"]], axis=1)
+ok_c = np.allclose(got_mv, expected_mv, rtol=1e-4)
 
-print(f"Kernel C — Batch mat-vec multiply ({N} systems)")
-print(f"  {'PASS' if ok_c else 'FAIL'}  max err: {np.max(np.abs(mv_out - expected_mv)):.2e}")
+print("Pattern A — Structured dtype + unboxing wrapper")
+print(f"  normalize({N} Vec3f structs) → Vec3f struct array")
+print(f"  {'PASS' if ok_a else 'FAIL'}  max err: {np.max(np.abs(got_norm - expected_norm)):.2e}")
 
-print(f"\nnumpy_utils round-trips (vec, mat): PASS")
+print()
+print("Pattern B — Element-wise device function (ufunc-style)")
+print(f"  pairwise_dot({N} Vec3f pairs) → float32 array")
+print(f"  {'PASS' if ok_b else 'FAIL'}  max err: {np.max(np.abs(dot_result - expected_dot)):.2e}")
+print()
+print(f"  matvec({N} Mat3f × Vec3f) → Vec3f struct array")
+print(f"  {'PASS' if ok_c else 'FAIL'}  max err: {np.max(np.abs(got_mv - expected_mv)):.2e}")
 
 all_pass = ok_a and ok_b and ok_c
 print(f"\n{'All passed.' if all_pass else 'FAILURES detected.'}")
