@@ -41,6 +41,7 @@ from eigenprim.dispatch import (
     determinant, inverse, transpose, trace, diagonal, vec_mul,
     DISPATCH_NAMES,
 )
+from eigenprim import numpy_utils  # host-side AoS ↔ SoA helpers
 
 # ── Build lazy import map ─────────────────────────────────────────
 
@@ -100,6 +101,7 @@ __all__ = [
     "bind_eigen_header",
     "EigenBindings",
     "links",
+    "numpy_utils",
     *DISPATCH_NAMES,
     *_LAZY_IMPORTS.keys(),
 ]
