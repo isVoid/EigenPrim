@@ -22,6 +22,30 @@ kernel[1, 1](out)
 
 Import types and functions, pass `links()` to `@cuda.jit`, and use them directly in the kernel. Four ways to call operations:
 
+## Execution Model — Thread-Level Primitives Only
+
+**Every eigenprim operation is a per-thread `__device__` primitive.**
+
+Each CUDA thread constructs and owns its own Eigen objects. There is no communication between threads, no shared memory access, and no synchronization involved. The mental model is:
+
+```
+one kernel thread  →  one Eigen object  →  one result
+```
+
+eigenprim has no warp- or block-level primitives (no reductions across threads, no shuffles, no barriers). For those, use CUDA intrinsics or [CUB](https://nvidia.github.io/cccl/cub/) (`cub::WarpReduce`, `cub::BlockReduce`, etc.). The two layers compose cleanly:
+
+```python
+@cuda.jit(link=links())
+def kernel(vals, out):
+    i = cuda.grid(1)
+    if i >= vals.shape[0]: return
+    # eigenprim: per-thread linear algebra
+    a = Vector3f(vals[i, 0], vals[i, 1], vals[i, 2])
+    scalar = dot(a, a)       # stays in this thread's registers
+    # hand scalar off to CUB / shared memory for cross-thread work
+    out[i] = scalar
+```
+
 - **Methods**: `a.dot(b)`, `M.inverse()`, `v.norm()` — Eigen-style chaining
 - **Operators**: `a + b`, `M @ v`, `v * 2.0`
 - **Generic functions**: `eigenprim.dot(a, b)`, `eigenprim.inverse(M)` — type-dispatched

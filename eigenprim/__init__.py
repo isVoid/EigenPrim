@@ -1,5 +1,10 @@
 """Eigenprim: Eigen device primitives for CUDA Python.
 
+All primitives are **per-thread** ``__device__`` functions.  Each CUDA thread
+constructs and owns its own Eigen objects; there is no cross-thread
+communication, shared memory, or synchronization.  For warp- or block-level
+operations use CUDA intrinsics or CUB alongside eigenprim.
+
 Four ways to call operations inside ``@cuda.jit`` kernels::
 
     from eigenprim import Vector3f, Matrix3f, dot, norm, links
