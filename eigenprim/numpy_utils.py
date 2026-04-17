@@ -9,19 +9,35 @@ in memory.  eigenprim provides a dtype for each bound type:
     pts = np.empty(N, dtype=vec3f_dtype)   # N packed Vec3f structs
     pts['x'] = ...                         # field view (strided)
 
-These are **not** passed directly to ``@cuda.jit`` kernels.  Instead, a
-Python wrapper function **unboxes** the struct fields into contiguous 1-D
-arrays before calling the kernel, then **boxes** the output components back
-into a struct array before returning to the caller::
+**Passing to kernels — zero-copy reinterpretation**
 
-    def normalize(pts: np.ndarray) -> np.ndarray:
-        \"\"\"Normalize a Vec3f struct array; returns a Vec3f struct array.\"\"\"
-        px, py, pz = unbox_vec3f(pts)           # extract contiguous fields
-        ox = np.empty(len(pts), dtype=np.float32)
-        oy = np.empty(len(pts), dtype=np.float32)
-        oz = np.empty(len(pts), dtype=np.float32)
-        _normalize_kernel[...](px, py, pz, ox, oy, oz)
-        return box_vec3f(ox, oy, oz)            # pack result into struct array
+Because all fields share the same scalar dtype, the packed struct array can be
+reinterpreted as a C-contiguous ``(N, k)`` float array with no data copy:
+
+    pts_f = as_floats(pts)   # view(np.float32).reshape(N, 3) — zero copy
+
+The kernel receives the 2-D float array and constructs a Vector3f from each
+row.  For output, the same trick means writes go straight through to the
+struct array:
+
+    def normalize(pts):
+        N = len(pts)
+        out = np.empty(N, dtype=vec3f_dtype)
+        _normalize_kernel[...](as_floats(pts), as_floats(out))
+        return out                             # out's memory was written by kernel
+
+Inside ``@cuda.jit`` the kernel constructs the Eigen type from the row:
+
+    @cuda.jit(link=links())
+    def _normalize_kernel(pts, out):           # both are (N, 3) float32
+        i = cuda.grid(1)
+        if i >= pts.shape[0]: return
+        p = Vector3f(pts[i, 0], pts[i, 1], pts[i, 2])
+        u = normalized(p)
+        ...
+        out[i, 0] = dot(u, e0)
+        out[i, 1] = dot(u, e1)
+        out[i, 2] = dot(u, e2)
 
 This module also keeps the AoS ↔ SoA helpers (``vec_to_soa`` / ``soa_to_vec``,
 ``mat_to_soa`` / ``soa_to_mat``) for interoperating with SoA-style kernels.
@@ -32,6 +48,8 @@ None of the functions here are callable inside ``@cuda.jit`` kernels.
 import numpy as np
 
 __all__ = [
+    # Zero-copy view helper
+    "as_floats",
     # Structured dtypes — float32 vectors
     "vec2f_dtype", "vec3f_dtype", "vec4f_dtype",
     # Structured dtypes — float64 vectors
@@ -54,6 +72,40 @@ __all__ = [
     "vec_to_soa", "soa_to_vec",
     "mat_to_soa", "soa_to_mat",
 ]
+
+
+# ── Zero-copy view helper ─────────────────────────────────────────────────────
+
+def as_floats(arr):
+    """Reinterpret a packed eigenprim struct array as a C-contiguous float array.
+
+    For a struct array of shape ``(N,)`` whose fields all share the same scalar
+    dtype (e.g. ``vec3f_dtype`` with three ``float32`` fields), this returns a
+    **zero-copy** ``(N, k)`` view of the same memory, where *k* is the number
+    of scalar fields per struct.
+
+    The returned array is C-contiguous and can be passed directly to a
+    ``@cuda.jit`` kernel.  Because it is a view, any writes the kernel makes
+    to the output array are immediately visible in the original struct array.
+
+    Parameters
+    ----------
+    arr : np.ndarray with a homogeneous structured dtype, shape (N,)
+
+    Returns
+    -------
+    np.ndarray, shape (N, k), C-contiguous, same scalar dtype as the fields.
+
+    Example
+    -------
+    >>> pts = np.empty(N, dtype=vec3f_dtype)
+    >>> pts_f = as_floats(pts)          # shape (N, 3), zero copy
+    >>> out = np.empty(N, dtype=vec3f_dtype)
+    >>> _kernel[blocks, tpb](pts_f, as_floats(out))   # writes through to out
+    """
+    scalar = arr.dtype[0]               # dtype of first (and all) fields
+    k      = arr.dtype.itemsize // scalar.itemsize
+    return arr.view(scalar).reshape(len(arr), k)
 
 
 # ── Structured dtype definitions ──────────────────────────────────────────────
