@@ -9,6 +9,27 @@ import tempfile
 from numba import cuda
 
 
+def _find_nvcc():
+    """Locate the nvcc executable.
+
+    Search order (via cuda-pathfinder):
+      1. NVIDIA Python wheels  (site-packages/nvidia/cuda_nvcc/bin/)
+      2. Conda environment     (CONDA_PREFIX/bin/)
+      3. CUDA Toolkit env vars (CUDA_HOME/bin/ or CUDA_PATH/bin/)
+
+    Falls back to shutil.which for any PATH-based install that pathfinder
+    may not cover.
+    """
+    try:
+        from cuda.pathfinder import find_nvidia_binary_utility
+        path = find_nvidia_binary_utility("nvcc")
+        if path:
+            return path
+    except Exception:
+        pass
+    return shutil.which("nvcc")
+
+
 def _detect_arch():
     """Detect GPU compute capability from the current CUDA device."""
     cc = cuda.get_current_device().compute_capability
@@ -30,9 +51,12 @@ def compile_fatbin(impl_cu, include_dirs, arch=None, cache_dir=None):
     Raises:
         RuntimeError: If nvcc is not found or compilation fails.
     """
-    nvcc = shutil.which("nvcc")
+    nvcc = _find_nvcc()
     if nvcc is None:
-        raise RuntimeError("nvcc not found on PATH")
+        raise RuntimeError(
+            "nvcc not found. Install the nvidia-cuda-nvcc wheel "
+            "(pip install nvidia-cuda-nvcc) or ensure nvcc is on PATH."
+        )
 
     if arch is None:
         arch = _detect_arch()

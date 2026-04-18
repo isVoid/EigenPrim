@@ -18,6 +18,7 @@ scikit-build-core = "*"
 pip = "*"
 ninja = "*"
 numpy = "*"
+cuda-pathfinder = ">=1.5"
 
 [system-requirements]
 cuda = "12"
