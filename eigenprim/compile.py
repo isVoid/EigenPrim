@@ -2,7 +2,6 @@
 
 import hashlib
 import os
-import shutil
 import subprocess
 import tempfile
 
@@ -10,24 +9,24 @@ from numba import cuda
 
 
 def _find_nvcc():
-    """Locate the nvcc executable.
+    """Locate the nvcc executable via cuda-pathfinder.
 
-    Search order (via cuda-pathfinder):
-      1. NVIDIA Python wheels  (site-packages/nvidia/cuda_nvcc/bin/)
+    Search order:
+      1. NVIDIA Python wheels  (site-packages/nvidia/cu13/bin/ or nvidia/cuda_nvcc/bin/)
       2. Conda environment     (CONDA_PREFIX/bin/)
       3. CUDA Toolkit env vars (CUDA_HOME/bin/ or CUDA_PATH/bin/)
 
-    Falls back to shutil.which for any PATH-based install that pathfinder
-    may not cover.
+    Raises:
+        RuntimeError: If nvcc cannot be found.
     """
-    try:
-        from cuda.pathfinder import find_nvidia_binary_utility
-        path = find_nvidia_binary_utility("nvcc")
-        if path:
-            return path
-    except Exception:
-        pass
-    return shutil.which("nvcc")
+    from cuda.pathfinder import find_nvidia_binary_utility
+    path = find_nvidia_binary_utility("nvcc")
+    if path is None:
+        raise RuntimeError(
+            "nvcc not found. Install the CUDA compiler wheel:\n"
+            "  pip install nvidia-nvcc-cu13"
+        )
+    return path
 
 
 def _detect_arch():
@@ -51,12 +50,7 @@ def compile_fatbin(impl_cu, include_dirs, arch=None, cache_dir=None):
     Raises:
         RuntimeError: If nvcc is not found or compilation fails.
     """
-    nvcc = _find_nvcc()
-    if nvcc is None:
-        raise RuntimeError(
-            "nvcc not found. Install the nvidia-cuda-nvcc wheel "
-            "(pip install nvidia-cuda-nvcc) or ensure nvcc is on PATH."
-        )
+    nvcc = _find_nvcc()  # raises RuntimeError if not found
 
     if arch is None:
         arch = _detect_arch()
