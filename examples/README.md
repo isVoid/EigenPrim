@@ -14,4 +14,3 @@ Run all: `pixi run run-examples`
 | [08_aabb_reduction.py](08_aabb_reduction.py) | Axis-aligned bounding box using `cwise_min`, `cwise_max`, `min_coeff`, `max_coeff`. |
 | [09_double_precision.py](09_double_precision.py) | Double-precision gravitational N-body with `Vector3d`, `squared_norm`, `norm`. |
 | [10_methods.py](10_methods.py) | Method invocation on types: `a.dot(b)`, `v.norm()`, `M.inverse()`, `M.vec_mul(v)`, chaining. |
-| [11_numpy_aos.py](11_numpy_aos.py) | numpy packed-struct dtype arrays (`vec3f_dtype`, `mat3f_dtype`) with unboxing wrappers; element-wise `@cuda.jit(device=True)` functions (ufunc-style). |
