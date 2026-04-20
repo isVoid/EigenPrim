@@ -385,7 +385,7 @@ pixi run run-examples  # examples only
 
 - [numbast](https://github.com/NVIDIA/numbast) — C++ to Numba binding generator
 - [Eigen](https://eigen.tuxfamily.org/) — via conda-forge
-- CUDA Toolkit 12.9 — via pixi
+- CUDA Toolkit 13 — via pixi
 
 ### Eigen Detection
 

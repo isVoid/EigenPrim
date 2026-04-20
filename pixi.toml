@@ -21,19 +21,19 @@ numpy = "*"
 cuda-pathfinder = ">=1.5"
 
 [system-requirements]
-cuda = "12"
+cuda = "13"
 
 [dependencies.numba-cuda]
 version = ">=0.25.0"
 
 [dependencies.cuda-version]
-version = "12.9.*"
+version = "13.*"
 
 [dependencies.cuda-toolkit]
-version = "12.9.*"
+version = "13.*"
 
 [dependencies.cuda-python]
-version = "12.9.*"
+version = "13.*"
 
 [tasks.build-ast-canopy]
 cmd = ["bash", "/home/wangm/numbast/ast_canopy/build.sh", "--incremental"]
