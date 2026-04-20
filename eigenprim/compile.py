@@ -24,7 +24,7 @@ def _find_nvcc():
     if path is None:
         raise RuntimeError(
             "nvcc not found. Install the CUDA compiler wheel:\n"
-            "  pip install nvidia-nvcc-cu13"
+            "  pip install nvidia-cuda-nvcc"
         )
     return path
 
