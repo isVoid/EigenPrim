@@ -11,6 +11,9 @@ __pycache__/
 # Pixi
 .pixi/
 
+# Dev environment (local-only)
+.devcontainer/
+
 # Dev journals (local-only)
 LOG.md
 TODO.md
