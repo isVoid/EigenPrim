@@ -47,9 +47,10 @@ def bind_eigen_header(
 
     Parameters:
         header: Path to the .cuh with __device__ functions (uses real Eigen).
-        decl_header: Path to the NVRTC-safe declarations header.
+        decl_header: Path to the NVRTC-safe declarations header (parsed by
+            ast_canopy; includes eigen_stub.cuh only, not real Eigen).
         impl_cu: Path to the nvcc compilation unit (.cu file).
-        eigen_include: Path to the Eigen include directory.
+        eigen_include: Path to the Eigen include directory (used by nvcc only).
         stub_header: Optional path to NVRTC-safe stub for non-native types (L2).
             Required when type_map is provided.
         type_map: Optional dict mapping full qualified C++ type names to the
@@ -71,18 +72,15 @@ def bind_eigen_header(
     # Set NVRTC search paths
     cuda_config.CUDA_NVRTC_EXTRA_SEARCH_PATHS = include_dir
 
-    # Parse the real header to get function declarations
-    retain = [header]
+    # Parse only the NVRTC-safe decl header (includes eigen_stub.cuh, not real
+    # Eigen headers). This is simpler and well-formed, so no bypass needed.
+    retain = [decl_header]
     if extra_retain:
         retain += [os.path.join(include_dir, f) for f in extra_retain]
-    # Also retain the decl header if it exists separately
-    if decl_header not in retain:
-        retain.append(decl_header)
 
     decls = parse_declarations_from_source(
-        header, retain, cc,
-        additional_includes=[eigen_include],
-        bypass_parse_error=True,
+        decl_header, retain, cc,
+        additional_includes=[include_dir],
     )
 
     # Create shim writer pointing at the NVRTC-safe decl header
@@ -95,45 +93,28 @@ def bind_eigen_header(
 
     # Bind structs from the parsed declarations
     for struct in decls.structs:
-        try:
-            S = bind_cxx_struct(shim_writer, struct, nbtypes.Type, StructModel)
-            bound_types[struct.name] = S
-        except Exception:
-            pass
+        S = bind_cxx_struct(shim_writer, struct, nbtypes.Type, StructModel)
+        bound_types[struct.name] = S
 
     # Bind device functions
     bound_functions = {}
     for func in decls.functions:
         if func.exec_space not in (execution_space.device, execution_space.host_device):
             continue
-        try:
-            result = bind_cxx_function(shim_writer, func)
-            if result is not None:
-                bound_functions[func.name] = result
-        except Exception:
-            pass
+        result = bind_cxx_function(shim_writer, func)
+        if result is not None:
+            bound_functions[func.name] = result
 
     # Bind function templates (L3)
-    # Deduplicate by qualified name — when both the main header and decl header
-    # are in files_to_retain, each function template appears twice.
     if decls.function_templates:
-        seen = set()
-        deduped = []
-        for ft in decls.function_templates:
-            if ft.qual_name not in seen:
-                seen.add(ft.qual_name)
-                deduped.append(ft)
-        try:
-            func_apis = bind_cxx_function_templates(
-                function_templates=deduped,
-                shim_writer=shim_writer,
-            )
-            for f in func_apis:
-                name = getattr(f, "__name__", None)
-                if name:
-                    bound_functions[name] = f
-        except Exception:
-            pass
+        func_apis = bind_cxx_function_templates(
+            function_templates=decls.function_templates,
+            shim_writer=shim_writer,
+        )
+        for f in func_apis:
+            name = getattr(f, "__name__", None)
+            if name:
+                bound_functions[name] = f
 
     # Compile fatbin
     fatbin_path = compile_fatbin(
