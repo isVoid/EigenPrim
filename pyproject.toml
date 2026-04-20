@@ -1,0 +1,26 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "eigenprim"
+version = "0.1.0"
+description = "Eigen device primitives for CUDA Python"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "numba-cuda>=0.25.0",
+    "cuda-pathfinder>=1.5",
+    "cuda-python>=13",
+    "numbast",
+    "ast_canopy",
+]
+
+[project.optional-dependencies]
+# Runtime nvcc compiler — can also be satisfied by a system/conda install
+# discovered via CUDA_HOME or CONDA_PREFIX.
+nvcc = ["nvidia-cuda-nvcc"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["eigenprim"]

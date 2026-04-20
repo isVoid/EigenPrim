@@ -3,9 +3,7 @@
 import os
 
 
-_INCLUDE_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "include"
-)
+_INCLUDE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "include")
 
 
 def find_eigen_include():
