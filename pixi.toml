@@ -1,0 +1,39 @@
+[workspace]
+name = "numbast-eigen"
+channels = ["conda-forge", "numba", "nvidia"]
+platforms = ["linux-64"]
+
+[dependencies]
+python = ">=3.10"
+eigen = "*"
+pytest = "*"
+cxx-compiler = "*"
+pip = "*"
+numpy = "*"
+cuda-pathfinder = ">=1.5"
+
+[system-requirements]
+cuda = "13"
+
+[dependencies.numba-cuda]
+version = ">=0.25.0"
+
+[dependencies.cuda-version]
+version = "13.*"
+
+[dependencies.cuda-toolkit]
+version = "13.*"
+
+[dependencies.cuda-python]
+version = "13.*"
+
+[tasks.install-all]
+cmd = ["python", "-m", "pip", "install", "-e", "."]
+
+[tasks.run-examples]
+cmd = ["bash", "scripts/run_examples.sh"]
+depends-on = ["install-all"]
+
+[tasks.test]
+cmd = ["pytest", "tests/", "-v"]
+depends-on = ["install-all", "run-examples"]
