@@ -17,7 +17,7 @@ Usage::
 
 import os
 
-from eigenprim._env import find_eigen_include, include_dir
+from eigenprim._env import fatbin_dir, include_dir
 from eigenprim._registry import register
 from eigenprim.bind import bind_eigen_header
 
@@ -69,8 +69,7 @@ _TYPE_MAP = {
 _bindings = bind_eigen_header(
     header=os.path.join(_INCLUDE, "matrix.cuh"),
     decl_header=os.path.join(_INCLUDE, "matrix_decl.cuh"),
-    impl_cu=os.path.join(_INCLUDE, "matrix.cu"),
-    eigen_include=find_eigen_include(),
+    fatbin=os.path.join(fatbin_dir(), "matrix.fatbin"),
     stub_header=os.path.join(_INCLUDE, "eigen_stub.cuh"),
     type_map=_TYPE_MAP,
 )
