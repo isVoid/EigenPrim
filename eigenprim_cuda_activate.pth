@@ -1,0 +1,1 @@
+import _eigenprim_nvidia_path; _eigenprim_nvidia_path.install()
