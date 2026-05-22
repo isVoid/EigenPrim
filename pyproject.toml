@@ -26,6 +26,11 @@ minimum-version = "build-system.requires"
 wheel.packages = ["eigenprim"]
 wheel.py-api = "py3"
 wheel.platlib = false
+wheel.license-files = [
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md",
+    "LICENSES/eigen/COPYING.*",
+]
 
 [tool.scikit-build.cmake]
 version = ">=3.27"
