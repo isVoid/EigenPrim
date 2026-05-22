@@ -1,6 +1,11 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = [
+    "cuda-activate @ git+https://github.com/dalcinl/skbuild-cuda-demo.git@master#subdirectory=src/cuda-activate",
+    "cuda-pathfinder>=1.5",
+    "cuda-toolkit[cccl,nvcc,cudart]==13.*",
+    "scikit-build-core>=0.12",
+]
+build-backend = "scikit_build_core.build"
 
 [project]
 name = "eigenprim"
@@ -11,16 +16,16 @@ requires-python = ">=3.10"
 dependencies = [
     "numpy",
     "numba-cuda>=0.25.0",
-    "cuda-pathfinder>=1.5",
     "cuda-python>=13",
     "numbast>=0.8.0",
     "ast_canopy>=0.8.0",
 ]
 
-[project.optional-dependencies]
-# Runtime nvcc compiler — can also be satisfied by a system/conda install
-# discovered via CUDA_HOME or CONDA_PREFIX.
-nvcc = ["nvidia-cuda-nvcc"]
+[tool.scikit-build]
+minimum-version = "build-system.requires"
+wheel.packages = ["eigenprim"]
+wheel.py-api = "py3"
+wheel.platlib = false
 
-[tool.hatch.build.targets.wheel]
-packages = ["eigenprim"]
+[tool.scikit-build.cmake]
+version = ">=3.27"

@@ -2,9 +2,11 @@
 
 import os
 import sys
+import sysconfig
 
 
 _INCLUDE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "include")
+_FATBIN_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fatbin")
 
 
 def find_eigen_include():
@@ -47,3 +49,22 @@ def find_eigen_include():
 def include_dir():
     """Path to eigenprim's bundled include/ directory."""
     return _INCLUDE_DIR
+
+
+def fatbin_dir():
+    """Path to eigenprim's bundled fatbin/ directory."""
+    if os.path.exists(os.path.join(_FATBIN_DIR, "matrix.fatbin")):
+        return _FATBIN_DIR
+
+    candidates = []
+    for key in ("purelib", "platlib"):
+        path = sysconfig.get_paths().get(key)
+        if path:
+            candidates.append(os.path.join(path, "eigenprim", "fatbin"))
+    candidates.extend(os.path.join(path, "eigenprim", "fatbin") for path in sys.path)
+
+    for candidate in candidates:
+        if os.path.exists(os.path.join(candidate, "matrix.fatbin")):
+            return candidate
+
+    return _FATBIN_DIR

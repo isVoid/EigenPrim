@@ -49,20 +49,31 @@ Examples 03-09 are realistic parallel patterns verified against numpy. See [exam
 
 ### pip
 
-Install Eigen headers and a CUDA-compatible host C++ compiler (`g++`/`gcc` or
-`clang++`/`clang`) first. If Eigen is not in a standard include path, set
-`EIGEN_INCLUDE_DIR` to the directory that contains `Eigen/Dense`.
+Clone with submodules, then create an environment with Python 3.10+ and a
+CUDA-compatible host C++ compiler (`g++`/`gcc` or `clang++`/`clang`). EigenPrim
+uses the pinned Eigen checkout in `thirdparty/eigen` by default.
 
 ```bash
+git clone --recurse-submodules <EigenPrim repo>
+cd EigenPrim
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install -U pip
-python -m pip install -e ".[nvcc]"
+python -m pip install -e .
 pytest tests/ -v
 ```
 
-If your environment already provides `nvcc`, use `python -m pip install -e .`
-instead of the `nvcc` extra.
+If the repository was cloned without submodules, initialize Eigen before
+building:
+
+```bash
+git submodule update --init --recursive thirdparty/eigen
+```
+
+The build uses scikit-build-core and native CMake CUDA targets to compile
+EigenPrim's packaged fatbins. With normal build isolation, pip installs the CUDA
+compiler build dependencies declared in `pyproject.toml`; if you disable build
+isolation, your environment must already provide nvcc on `PATH`.
 
 ### pixi
 
@@ -82,16 +93,22 @@ build is required.
 
 - [numbast](https://github.com/NVIDIA/numbast) >= 0.8.0 — C++ to Numba binding generator
 - [ast_canopy](https://github.com/NVIDIA/numbast/tree/main/ast_canopy) >= 0.8.0 — C++ declaration parser
-- [Eigen](https://eigen.tuxfamily.org/) headers
-- CUDA Toolkit 13 or the `nvidia-cuda-nvcc` Python package
+- [Eigen](https://eigen.tuxfamily.org/) headers, provided by default as a pinned `thirdparty/eigen` submodule
+- CUDA Toolkit 13 or the CUDA compiler Python build dependencies
 - A CUDA-compatible host C++ compiler (`g++`/`gcc` or `clang++`/`clang`) available in the environment; `nvcc` uses it when compiling EigenPrim's fatbin
 
 ### Eigen Detection
 
-The Eigen include path is auto-detected from `EIGEN_INCLUDE_DIR`,
-`CONDA_PREFIX/include/eigen3`, `sys.prefix/include/eigen3`, and common system
-include paths such as `/usr/include/eigen3`. Override with `EIGEN_INCLUDE_DIR`
-if needed.
+During the wheel build, the `cuda-activate` build requirement puts the `nvcc`
+found by `cuda.pathfinder` on `PATH` before scikit-build-core configures CMake.
+CMake then uses normal CUDA language discovery, not a project-local `nvcc`
+command. Eigen detection prefers explicit overrides, then the pinned
+`thirdparty/eigen` submodule, then environment include paths such as
+`CONDA_PREFIX/include/eigen3`, `PREFIX/include/eigen3`, and common system include
+paths such as `/usr/include/eigen3`. Override with either `EIGEN_INCLUDE_DIR` or
+`-Ccmake.define.EIGENPRIM_EIGEN_INCLUDE_DIR=/path/to/eigen3`. Override
+`EIGENPRIM_CUDA_ARCHITECTURES` to choose which GPU architectures are embedded in
+the packaged fatbins.
 
 ## Available Types
 
@@ -430,8 +447,7 @@ from eigenprim import bind_eigen_header
 bindings = bind_eigen_header(
     header="my_ops.cuh",
     decl_header="my_ops_decl.cuh",
-    impl_cu="my_ops.cu",
-    eigen_include="/path/to/eigen3",
+    fatbin="my_ops.fatbin",
 )
 
 MyVec = bindings.types["MyVec"]
@@ -463,7 +479,10 @@ def kernel(out):
 
 The key requirement: NVRTC (used by numba-cuda) cannot compile Eigen headers.
 So you must separate declarations (NVRTC-safe stubs and trampolines) from
-implementations (compiled by nvcc into a fatbin). `links()` yields both for
+implementations compiled by CUDA C++ into a fatbin. EigenPrim's built-in matrix
+and generic fatbins are compiled by native CMake CUDA targets during the wheel
+build; for custom bindings, compile your own `.cu` implementation and pass its
+fatbin path to `bind_eigen_header`. `links()` yields both for
 `@cuda.jit(link=...)` to link together.
 
 ## License

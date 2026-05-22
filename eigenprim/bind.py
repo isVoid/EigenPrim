@@ -9,7 +9,6 @@ from numba import types as nbtypes
 from numba.cuda import config as cuda_config
 from numba.cuda.datamodel.models import StructModel
 
-from eigenprim.compile import compile_fatbin
 from eigenprim.types import register_eigen_types
 
 
@@ -44,21 +43,19 @@ class _EigenBindingLinks:
 def bind_eigen_header(
     header,
     decl_header,
-    impl_cu,
-    eigen_include,
+    fatbin,
     stub_header=None,
     type_map=None,
     extra_retain=None,
     cc="sm_80",
 ):
-    """One-call binding: parse -> register types -> bind functions -> compile -> link.
+    """One-call binding: parse -> register types -> bind functions -> link.
 
     Parameters:
         header: Path to the .cuh with __device__ functions (uses real Eigen).
         decl_header: Path to the NVRTC-safe declarations header (parsed by
             ast_canopy; includes eigen_stub.cuh only, not real Eigen).
-        impl_cu: Path to the nvcc compilation unit (.cu file).
-        eigen_include: Path to the Eigen include directory (used by nvcc only).
+        fatbin: Path to the precompiled nvcc fatbin for the implementation.
         stub_header: Optional path to NVRTC-safe stub for non-native types (L2).
             Required when type_map is provided.
         type_map: Optional dict mapping full qualified C++ type names to the
@@ -74,8 +71,11 @@ def bind_eigen_header(
     """
     header = os.path.abspath(header)
     decl_header = os.path.abspath(decl_header)
-    impl_cu = os.path.abspath(impl_cu)
+    fatbin = os.path.abspath(fatbin)
     include_dir = os.path.dirname(header)
+
+    if not os.path.exists(fatbin):
+        raise FileNotFoundError(f"Fatbin not found: {fatbin}")
 
     # Set NVRTC search paths
     cuda_config.CUDA_NVRTC_EXTRA_SEARCH_PATHS = include_dir
@@ -124,9 +124,4 @@ def bind_eigen_header(
             if name:
                 bound_functions[name] = f
 
-    # Compile fatbin
-    fatbin_path = compile_fatbin(
-        impl_cu, [eigen_include, include_dir],
-    )
-
-    return EigenBindings(bound_types, bound_functions, shim_writer, fatbin_path)
+    return EigenBindings(bound_types, bound_functions, shim_writer, fatbin)
